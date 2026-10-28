@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Update the CI checkout and artifact actions, with byte-for-byte artifact
+  upload/download verification.
+- Update mypy and Twine while retaining the validated runtime dependency versions.
+- Review future major Python dependency upgrades individually; group only minor
+  and patch updates.
+- Check exact sorted CSR neighborhoods across multiple Arrow batches to catch
+  ordering regressions that preserve edge counts.
+
 ## 0.2.0b1
 
 - Introduce `analyze`, `demo`, `serve`, `inspect`, `verify`, `neighbors`, `members`
