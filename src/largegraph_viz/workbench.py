@@ -205,7 +205,12 @@ def dispatch(args, raw_args: list[str]) -> None:
         if args.dry_run:
             emit(
                 preflight(
-                    args.input, args.work_dir or args.output, resources, args.ram, options.delimiter
+                    args.input,
+                    args.work_dir or args.output,
+                    resources,
+                    args.ram,
+                    options.delimiter,
+                    options,
                 )
             )
             return

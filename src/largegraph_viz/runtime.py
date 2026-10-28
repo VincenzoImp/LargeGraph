@@ -39,8 +39,12 @@ class Resources:
         for value in (self.memory, self.temp_limit):
             if not re.fullmatch(r"[1-9][0-9]*(?:MB|GB|MiB|GiB)", value):
                 raise ValueError("Memory sizes must be positive integer MB, GB, MiB or GiB")
-        if self.threads < 1 or self.batch_rows < 1:
-            raise ValueError("threads and batch_rows must be positive")
+        for name in ("threads", "batch_rows"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise ValueError(f"{name} must be a positive integer")
+        if self.temp_dir is not None:
+            object.__setattr__(self, "temp_dir", os.fspath(self.temp_dir))
 
     def connect(self, directory: Path):
         import duckdb
