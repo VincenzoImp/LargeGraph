@@ -112,10 +112,14 @@ def cached_directory(destination: Path) -> Iterator[Path | None]:
             yield None
             return
         partial = destination.with_name(destination.name + ".inprogress")
-        if partial.exists() and not (partial / "owner.json").exists():
-            raise ValueError(
-                f"Unrecognized partial artifact: {partial}; move it aside before retrying"
-            )
+        if partial.exists():
+            if partial.is_symlink() or not (partial / "owner.json").is_file():
+                raise ValueError(
+                    f"Unrecognized partial artifact: {partial}; move it aside before retrying"
+                )
+            owner = read_json(partial / "owner.json")
+            if owner != {"artifact": destination.name, "schema": 1}:
+                raise ValueError(f"Partial artifact ownership mismatch: {partial}")
         partial.mkdir(exist_ok=True)
         write_json(partial / "owner.json", {"artifact": destination.name, "schema": 1})
         try:

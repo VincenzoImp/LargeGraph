@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
+import sys
 
 import numpy as np
 
@@ -58,11 +60,25 @@ def layout(weights, seed=42, engine="auto"):
             if fields and fields[0] == "node":
                 coords[int(fields[1])] = [float(fields[2]), float(fields[3])]
         return coords, "Graphviz-sfdp"
-    import igraph as ig
-
-    graph = ig.Graph(n=n, edges=list(zip(a.tolist(), b.tolist(), strict=True)), directed=False)
-    initial = np.random.default_rng(seed).normal(size=(n, 2)).tolist()
-    coords = np.asarray(
-        graph.layout_fruchterman_reingold(weights=w.tolist(), seed=initial, niter=500).coords
+    # igraph uses random jitter even with explicit initial coordinates. Its RNG
+    # setter is global and has no getter, so a worker gives reproducibility
+    # without overwriting an embedding application's RNG configuration.
+    run = subprocess.run(
+        [sys.executable, "-m", "largegraph_viz._layout_worker"],
+        input=json.dumps(
+            {
+                "nodes": n,
+                "sources": a.tolist(),
+                "targets": b.tolist(),
+                "weights": w.tolist(),
+                "seed": seed,
+            }
+        ),
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=300,
     )
-    return coords, "igraph-Fruchterman-Reingold"
+    return np.asarray(
+        json.loads(run.stdout), dtype=float
+    ), "igraph-Fruchterman-Reingold-seeded-worker"

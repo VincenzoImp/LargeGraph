@@ -1,0 +1,20 @@
+{
+  "available_memory_bytes": 6099185664,
+  "columns": [
+    "source",
+    "target"
+  ],
+  "duckdb_budget_bytes": 3000000000,
+  "estimate_basis": "CSV byte sample; multiline records and ID lengths can change the estimate",
+  "estimated_input_rows": 499942508,
+  "estimated_workspace_bytes": 49994250800,
+  "free_workspace_bytes": 152319660032,
+  "hard_limit": false,
+  "input": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/edges.csv",
+  "input_bytes": 7777974671,
+  "limits": "RAM target guides configuration, not an OS limit; use the Linux cgroup runner for enforcement. Estimates are not guarantees.",
+  "ram_target_bytes": 8000000000,
+  "warnings": [
+    "RAM target exceeds currently available memory; lower --ram or close other jobs"
+  ]
+}

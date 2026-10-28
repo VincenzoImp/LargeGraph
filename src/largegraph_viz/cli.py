@@ -36,7 +36,9 @@ def input_options(parser, clustering=True):
     )
     if clustering:
         parser.add_argument(
-            "--backend", choices=["streaming", "clustre", "leiden"], default="streaming"
+            "--backend",
+            choices=["streaming", "clustre", "leiden", "networkit"],
+            default="streaming",
         )
         parser.add_argument("--passes", type=int, default=5)
         parser.add_argument("--resolution", type=float, default=1)
@@ -185,13 +187,16 @@ def main(argv=None):
         format="%(asctime)s %(levelname)s %(message)s",
     )
     logging.getLogger("fontTools").setLevel(logging.WARNING)
-    resources = Resources(
-        memory=args.memory,
-        threads=args.threads,
-        batch_rows=args.batch_rows,
-        temp_dir=str(args.temp_dir.resolve()) if args.temp_dir else None,
-        temp_limit=args.temp_limit,
-    )
+    try:
+        resources = Resources(
+            memory=args.memory,
+            threads=args.threads,
+            batch_rows=args.batch_rows,
+            temp_dir=str(args.temp_dir.resolve()) if args.temp_dir else None,
+            temp_limit=args.temp_limit,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     try:
         if args.command == "generate":
             from .generate import generate_graph

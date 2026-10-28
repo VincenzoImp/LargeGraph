@@ -1,0 +1,46 @@
+{
+  "cgroup_memory_peak_bytes": 8000000000,
+  "command": [
+    ".venv/bin/largegraph-viz",
+    "analyze",
+    "runs/full-scale-data/n5000000-communities-s42/data/edges.csv",
+    "--nodes-file",
+    "runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+    "--output",
+    "runs/release-cold-final",
+    "--memory",
+    "3GB",
+    "--threads",
+    "2",
+    "--hash-input",
+    "--max-groups",
+    "512",
+    "--hierarchy-targets",
+    "16",
+    "64",
+    "256",
+    "--images",
+    "--pixels",
+    "512"
+  ],
+  "exit_code": 0,
+  "interpretation": "Cgroup memory includes page cache and child processes. CPU quota limits CPU time, not CPU model or physical frequency.",
+  "memory_events": {
+    "high": "0",
+    "low": "0",
+    "max": "66730",
+    "oom": "0",
+    "oom_group_kill": "0",
+    "oom_kill": "0"
+  },
+  "observed_limits": {
+    "cpu_max": "800000 100000",
+    "memory_max": "8000000000",
+    "memory_swap_max": "0"
+  },
+  "sampled_swap_peak_bytes": 0,
+  "samples": 2531,
+  "unit": "largegraph-95c7fc1675bc.service",
+  "verified_hard_limits": true,
+  "wall_seconds": 507.3321531349793
+}

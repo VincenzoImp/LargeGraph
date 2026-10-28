@@ -1,0 +1,6 @@
+{
+  "url": "https://snap.stanford.edu/data/facebook_combined.txt.gz",
+  "sha256": "125e84db872eeba443d270c70315c256b0af43a502fcfe51f50621166ad035d7",
+  "dataset_page": "https://snap.stanford.edu/data/ego-Facebook.html",
+  "citation": "J. McAuley and J. Leskovec. Learning to Discover Social Circles in Ego Networks. NIPS 2012."
+}

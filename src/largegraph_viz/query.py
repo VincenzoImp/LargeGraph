@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 import numpy as np
@@ -16,7 +17,8 @@ def build_index(prepared: Path, clustering: Path, profile: Path, resources: Reso
     config = {
         "prepared": read_json(prepared / "manifest.json")["config"],
         "clustering": read_json(clustering / "manifest.json")["config"],
-        "version": 1,
+        "profile": read_json(profile / "manifest.json")["config"],
+        "version": 2,
     }
     destination = prepared.parent / ("index-" + signature(config)[:20])
     with cached_directory(destination) as out:
@@ -66,7 +68,7 @@ def neighbors(prepared: Path, index: Path, node: str, limit: int = 100) -> dict:
     """Return the first neighbors in compact-ID order, with an explicit total."""
     if not 1 <= limit <= 10_000:
         raise ValueError("limit must be between 1 and 10,000")
-    with connect_index(index) as con:
+    with closing(connect_index(index)) as con:
         row = con.execute("SELECT * FROM nodes WHERE original_id=?", (node,)).fetchone()
         if row is None:
             raise ValueError(f"Unknown original node ID: {node!r}")
@@ -102,7 +104,7 @@ def neighbors(prepared: Path, index: Path, node: str, limit: int = 100) -> dict:
 def members(index: Path, community: int, limit: int = 100, after: int = -1) -> dict:
     if community < 0 or not 1 <= limit <= 10_000 or after < -1:
         raise ValueError("Invalid community, cursor or limit")
-    with connect_index(index) as con:
+    with closing(connect_index(index)) as con:
         records = [
             dict(row)
             for row in con.execute(

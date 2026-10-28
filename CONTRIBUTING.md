@@ -12,7 +12,7 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then:
 ```bash
 uv sync --locked --extra images --extra leiden --extra validation
 uv run --no-sync ruff check .
-uv run --no-sync ruff format --check src tests
+uv run --no-sync ruff format --check src tests scripts
 uv run --no-sync mypy
 uv run --no-sync pytest -q -m 'not browser'
 ```
@@ -30,6 +30,7 @@ uv run --no-sync playwright install chromium
 uv run --no-sync pytest -q -m browser
 ```
 
+The optional `benchmarks` group installs NetworKit for controlled comparisons.
 The HTML asset is self-contained. Format edits with
 `npx --yes prettier@3.6.2 --write src/largegraph_viz/assets/report.html` when npm is
 available. Node is not required to run or build the Python package.

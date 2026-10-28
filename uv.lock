@@ -1099,11 +1099,17 @@ images = [
 leiden = [
     { name = "leidenalg" },
 ]
+networkit = [
+    { name = "networkit", marker = "sys_platform != 'win32'" },
+]
 validation = [
     { name = "scikit-learn" },
 ]
 
 [package.dev-dependencies]
+benchmarks = [
+    { name = "networkit" },
+]
 browser = [
     { name = "playwright" },
 ]
@@ -1123,6 +1129,7 @@ requires-dist = [
     { name = "leidenalg", marker = "extra == 'leiden'", specifier = ">=0.10,<1" },
     { name = "matplotlib", marker = "extra == 'images'", specifier = ">=3.9,<4" },
     { name = "mpich", marker = "sys_platform == 'linux' and extra == 'clustre-build'", specifier = ">=4,<6" },
+    { name = "networkit", marker = "sys_platform != 'win32' and extra == 'networkit'", specifier = ">=11,<12" },
     { name = "numba", specifier = ">=0.61,<1" },
     { name = "numpy", specifier = ">=1.26,<3" },
     { name = "psutil", specifier = ">=6,<8" },
@@ -1130,9 +1137,10 @@ requires-dist = [
     { name = "scikit-learn", marker = "extra == 'validation'", specifier = ">=1.5,<2" },
     { name = "scipy", marker = "extra == 'images'", specifier = ">=1.13,<2" },
 ]
-provides-extras = ["images", "leiden", "validation", "clustre-build"]
+provides-extras = ["images", "leiden", "networkit", "validation", "clustre-build"]
 
 [package.metadata.requires-dev]
+benchmarks = [{ name = "networkit", specifier = ">=11,<12" }]
 browser = [{ name = "playwright", specifier = ">=1.51,<2" }]
 dev = [
     { name = "build", specifier = ">=1.2,<2" },
@@ -1501,6 +1509,37 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/67/43/e11d75a7fb635c6f63dd6e176cb3e050ec2fee35f2f2267b332a6ad351ec/narwhals-2.28.0.tar.gz", hash = "sha256:2d9860c80d6610820826e94c6e42ce4b1d92d89cdd479586e652a8d211dab345", size = 754977, upload-time = "2026-10-27T12:19:33.777Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cf/82/8ef9c7e0f50493307a49c09cfa7f00c5a778b6d1921f7b2dabe1d3a5809e/narwhals-2.28.0-py3-none-any.whl", hash = "sha256:1f69d6385ec30e2fa6e1fdeb37c562ecabd0f713f6f3e3b58a668c5c9df9567f", size = 490591, upload-time = "2026-10-27T12:19:31.649Z" },
+]
+
+[[package]]
+name = "networkit"
+version = "11.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "tabulate" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fa/2c/9d8629d1f5c1f22a2392e021271a38702c77bff5a169bb73e0c2cb99d0b0/networkit-11.2.2.tar.gz", hash = "sha256:94e3c64d7ef704a7e86a3d4a53f5c9baa7c880bc0f2d48e974878ccc40d52092", size = 8125843, upload-time = "2026-09-14T11:59:41.965Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/4e/3a0d9487405d7a21f1d4c5b732d7b13f22fafd25565986fec1c82006fe5b/networkit-11.2.2-cp311-cp311-macosx_26_0_arm64.whl", hash = "sha256:fd331cf0252341e064194f4945e99998cc65af75643c7ac8ddf5bb455e09dede", size = 9601514, upload-time = "2026-09-15T08:09:48.472Z" },
+    { url = "https://files.pythonhosted.org/packages/24/86/e3b9547c07e3024e2ace6b28b4f6628b7dad8e94bc78a1e19aa4a33cdac9/networkit-11.2.2-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f4561aad91ca514d3865a7bd5ef8622d7615b93e9e02d7353c4e9dd6df967147", size = 11512310, upload-time = "2026-09-15T08:09:52.995Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/34/d4b0ab16e43635b37caab927f5b30b50aa80f15f0f4a3776d30af3e6011b/networkit-11.2.2-cp311-cp311-win_amd64.whl", hash = "sha256:c4e7ce2f65bf765be3a647f70807011bdca24913456d01186de8065910090ad3", size = 30069114, upload-time = "2026-09-15T08:10:02.79Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/0a/6db0a659c6fa9151e0161d13e42cffe9285de0ed61a426a6ef7733356e08/networkit-11.2.2-cp312-cp312-macosx_26_0_arm64.whl", hash = "sha256:24c0de6697c49ee9096aed95ef6710b0f647c9b3777e765c115b07bcfecd277d", size = 9608656, upload-time = "2026-09-15T08:10:07.734Z" },
+    { url = "https://files.pythonhosted.org/packages/49/fe/7578e0e2480ba43c178ed785dbdf743d372f5ec06fd9290eef3b83f7e36f/networkit-11.2.2-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b0d227fa913d595c5b2616f86e1de93345de98dd2dc3bb1f3d7476e89881247f", size = 11433007, upload-time = "2026-09-15T08:10:12.964Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/b4/420d04c9ecf205f210810854503c01d34a49121359ba3a9014f37ae8b8cb/networkit-11.2.2-cp312-cp312-win_amd64.whl", hash = "sha256:3a7097e37f4277c8cab13969c68ac48fbcf3b945c33cf1cea9323c8ee3f01f5a", size = 30062174, upload-time = "2026-09-15T08:10:25.208Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/2a/002a197c91c4892c0221eae93c074121d7bdddb65fa63c4b4a537fe5c904/networkit-11.2.2-cp313-cp313-macosx_26_0_arm64.whl", hash = "sha256:899a73176cee3365521baf6c7df33aba572817bf4c124e6d93dfb7c7d9da2d5a", size = 9588961, upload-time = "2026-09-15T08:10:30.619Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/52/fdaa9baa615cfa7e8aded3f4c5b5c7f21bfb25c4cdc4dd085732605829a1/networkit-11.2.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0f9bd1e5b4e0baa40242bedc1a143dad12e6a009d36ec61ec369af5f00eb5ced", size = 11418086, upload-time = "2026-09-15T08:10:36.108Z" },
+    { url = "https://files.pythonhosted.org/packages/a0/ce/1a064cd1fc7eb8f532b36c500af46ea9a17de21f10f7de55f5679cbf9a7e/networkit-11.2.2-cp313-cp313-win_amd64.whl", hash = "sha256:582a1aaf77303c2f4609d819495abf360f5bbf53844267efa1922185a4a641b4", size = 30052237, upload-time = "2026-09-15T08:10:47.61Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/39/e61460e66026d98776b1560b20ec1cf7f0a3a1d167ddb63bf6b6392ec691/networkit-11.2.2-cp314-cp314-macosx_26_0_arm64.whl", hash = "sha256:c0f8860d531a613d3d73705c2700325f7bc3ca52feaa738046cbc3bc781844ee", size = 9687327, upload-time = "2026-09-14T11:59:23.925Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/9f/cedf240dc259641eb57ddcaceb6834b79ba07122851f7ce5880292dbf183/networkit-11.2.2-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:98b5d53f025717640ec5a5c344c85192baa10cf96eb0aa2cc6b4fbc10ee19369", size = 11178461, upload-time = "2026-09-14T11:59:26.174Z" },
+    { url = "https://files.pythonhosted.org/packages/40/81/f8fdc1db2f606c7c87aa4703db9631f277a454d24be7ce363148f4e8f952/networkit-11.2.2-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:164e7caf9f48d76642e99585ae57eb920b118d00a92856c4a8a83fba2c3418a4", size = 11517385, upload-time = "2026-09-14T11:59:29.902Z" },
+    { url = "https://files.pythonhosted.org/packages/23/45/f88f089ebc74e3fd650acb50409acb0afc4a78201a80febab331a76ba49f/networkit-11.2.2-cp314-cp314-win_amd64.whl", hash = "sha256:fff3c5b4380a42eb1ece54bffd3019ddb3bf4d7a2dd267e44e7886fa4f7e588c", size = 30547139, upload-time = "2026-09-14T11:59:33.141Z" },
+    { url = "https://files.pythonhosted.org/packages/68/0d/14a943d90acd3b05c2fd164e7e939f862f64d186fe51c5b31735e4c14206/networkit-11.2.2-cp315-cp315-macosx_26_0_arm64.whl", hash = "sha256:c5f6964b71b684fabf3e72b4eedf153477e03c68f392c3f1c472a0ad1a766877", size = 9687306, upload-time = "2026-09-14T11:59:35.525Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/ce/c6b6b1791e2e29ff239075ce7426adec8314052dc700ca84ea0366d6281d/networkit-11.2.2-cp315-cp315-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b3737c56e83b8654da4bd396eb80a5ddad0cabd21ea45ba9fd208dea2f6a9d06", size = 11178243, upload-time = "2026-09-14T11:59:37.649Z" },
+    { url = "https://files.pythonhosted.org/packages/19/b1/80816306decdd2ac7c0ab8b5358534ac7a81cf72b47ee3ca18d58c223462/networkit-11.2.2-cp315-cp315-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0ea715243feeaa365e82043d63cfa0f21bf661a76857062dbe9b2d2c5e196844", size = 11518978, upload-time = "2026-09-14T11:59:39.82Z" },
 ]
 
 [[package]]
@@ -2386,6 +2425,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "tabulate"
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/58/8c37dea7bbf769b20d58e7ace7e5edfe65b849442b00ffcdd56be88697c6/tabulate-0.10.0.tar.gz", hash = "sha256:e2cfde8f79420f6deeffdeda9aaec3b6bc5abce947655d17ac662b126e48a60d", size = 91754, upload-time = "2026-03-04T18:55:34.402Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl", hash = "sha256:f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3", size = 39814, upload-time = "2026-03-04T18:55:31.284Z" },
 ]
 
 [[package]]

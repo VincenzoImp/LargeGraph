@@ -68,3 +68,23 @@ identifier lengths or every possible degree distribution. See `verification.md`.
 Sources: [DuckDB out-of-core processing](https://duckdb.org/docs/current/guides/performance/how_to_tune_workloads),
 [DuckDB memory management](https://duckdb.org/2024/07/09/memory-management),
 [DuckDB out-of-memory limitations](https://duckdb.org/docs/2.0/guides/performance/oom).
+
+
+## Local workbench (0.2)
+
+`analyze --ram 8GB` plans DuckDB at 3GB by default and reserves room for
+arrays, Arrow, JIT and rendering. It is a planning target; the enforced cgroup
+runner remains the hard-limit option. Run it from an installed package with
+`python -m largegraph_viz.constrained --output limited --memory-gb 8 --cpu-cores 8 -- largegraph-viz analyze edges.csv --output analysis`.
+
+The full 0.2 workbench adds an exact component pass, a disk lookup index and
+hierarchical summary cuts. Its [measured evidence](verification-beta.md) includes
+those operations. The index occupied about 331 MB at peak working storage in the
+first run. Component profiling took about 5.6 seconds on that workstation; these
+figures are specific to the recorded strong synthetic graph.
+
+The browser contains at most 1,024 aggregate groups per level, never 5 million
+node objects. The target-scale portable HTML was about 2 MB. Query responses cap
+at 10,000 rows. A bounded seeded layout runs in a separate CPU worker; its memory
+is included in process-tree monitoring. The operation cost table is in
+[workbench methods](workbench-methods.md).

@@ -6,7 +6,9 @@
     <meta name="color-scheme" content="dark light" />
     <title>largegraph-viz · Graph explorer</title>
     <style>
-      [hidden] { display: none !important; }
+      [hidden] {
+        display: none !important;
+      }
       :root {
         --bg: #10161e;
         --surface: #18212c;
@@ -547,8 +549,9 @@
       );
       const $ = (id) => document.getElementById(id),
         fmt = (n) => new Intl.NumberFormat("en").format(n);
+      const INITIAL_LEVEL = DATA.levels.length - 1;
       const state = {
-        level: 0,
+        level: INITIAL_LEVEL,
         scope: null,
         selected: null,
         view: "network",
@@ -556,6 +559,9 @@
         threshold: 1,
         history: [],
         hover: null,
+        zoom: 1,
+        panX: 0,
+        panY: 0,
       };
       const canvas = $("canvas"),
         ctx = canvas.getContext("2d");
@@ -741,8 +747,7 @@
         visible = activeNodes();
         positions = [];
         matrixRect = null;
-        const mass = visible.reduce((s, n) => s + n.size, 0),
-          ids = new Set(visible.map((n) => n.id));
+        const mass = visible.reduce((s, n) => s + n.size, 0);
         text(
           $("scope"),
           state.scope === null
@@ -763,19 +768,62 @@
           );
           return;
         }
-        const candidates = current().edges.filter(
-          ([a, b, w]) => ids.has(a) && ids.has(b) && w >= state.threshold,
-        );
+        // Keep only the strongest bounded set *within this view*. A drilldown
+        // must not inherit a global filter that hid all of its local links.
+        const cap =
+          current().edge_cap ?? current().filtering.display_edge_pairs;
+        const candidates = [];
+        const weaker = (a, b) =>
+          a[2] < b[2] ||
+          (a[2] === b[2] && (a[0] > b[0] || (a[0] === b[0] && a[1] > b[1])));
+        function offer(edge) {
+          if (!cap) return;
+          if (candidates.length < cap) {
+            candidates.push(edge);
+            let i = candidates.length - 1;
+            while (i > 0) {
+              const parent = (i - 1) >> 1;
+              if (!weaker(candidates[i], candidates[parent])) break;
+              [candidates[i], candidates[parent]] = [
+                candidates[parent],
+                candidates[i],
+              ];
+              i = parent;
+            }
+          } else if (weaker(candidates[0], edge)) {
+            candidates[0] = edge;
+            let i = 0;
+            while (true) {
+              let child = 2 * i + 1;
+              if (child >= candidates.length) break;
+              if (
+                child + 1 < candidates.length &&
+                weaker(candidates[child + 1], candidates[child])
+              )
+                child++;
+              if (!weaker(candidates[child], candidates[i])) break;
+              [candidates[child], candidates[i]] = [
+                candidates[i],
+                candidates[child],
+              ];
+              i = child;
+            }
+          }
+        }
         let allExternal = 0,
           allPairs = 0;
         for (let i = 0; i < visible.length; i++)
           for (let j = i + 1; j < visible.length; j++) {
-            const w = weight(visible[i].id, visible[j].id);
+            const a = visible[i].id,
+              b = visible[j].id,
+              w = weight(a, b);
             if (w) {
               allExternal += w;
               allPairs++;
+              if (w >= state.threshold) offer([a, b, w]);
             }
           }
+        candidates.sort((a, b) => b[2] - a[2] || a[0] - b[0] || a[1] - b[1]);
         const shown = candidates.reduce((s, e) => s + e[2], 0);
         let crossBoundary =
           visible.reduce((s, n) => s + n.volume - 2 * n.internal, 0) -
@@ -790,7 +838,9 @@
           drawNetwork(width, height, candidates, state.view === "density");
           text(
             $("caption"),
-            `${state.view === "density" ? "Visual smoothing of exact node masses at aggregate positions. " : ""}${fmt(candidates.length)} of ${fmt(allPairs)} visible group pairs drawn · ${fmt(allExternal - shown)} external edge weight omitted from lines · ${fmt(crossBoundary)} edges cross this view’s boundary. Node areas are proportional to population.`,
+            state.view === "density"
+              ? "Fixed-kernel smoothing of population at aggregate positions; colors use a view-normalized log scale. Exact counts are in the table/export. Camera boundaries can clip the field. Scroll to zoom · drag to pan · double-click to fit."
+              : `${fmt(candidates.length)} of ${fmt(allPairs)} visible group pairs drawn · ${fmt(allExternal - shown)} external edge weight omitted from lines · ${fmt(crossBoundary)} edges cross this view’s boundary. Area scales with population above a 0.4 px minimum radius. Scroll to zoom · drag to pan · double-click to fit.`,
           );
         }
       }
@@ -811,8 +861,15 @@
         const maxSize = Math.max(...current().nodes.map((n) => n.size));
         positions = visible.map((n) => ({
           node: n,
-          x: width / 2 + (n.x - (minX + maxX) / 2) * scale,
-          y: height / 2 + 20 - (n.y - (minY + maxY) / 2) * scale,
+          x:
+            width / 2 +
+            (n.x - (minX + maxX) / 2) * scale * state.zoom +
+            state.panX,
+          y:
+            height / 2 +
+            20 -
+            (n.y - (minY + maxY) / 2) * scale * state.zoom +
+            state.panY,
           r: Math.max(
             0.4,
             Math.sqrt(n.size / maxSize) *
@@ -824,19 +881,61 @@
         }));
         const byId = new Map(positions.map((p) => [p.node.id, p]));
         if (density) {
-          ctx.save();
-          ctx.globalCompositeOperation = "lighter";
-          for (const p of positions) {
-            const radius = Math.max(12, p.r * 3),
-              g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-            const alpha = Math.min(0.9, Math.max(0.05, p.node.size / maxSize));
-            g.addColorStop(0, `rgba(80,180,140,${alpha})`);
-            g.addColorStop(0.4, `rgba(40,110,100,${alpha * 0.45})`);
-            g.addColorStop(1, "rgba(0,0,0,0)");
-            ctx.fillStyle = g;
-            ctx.fillRect(p.x - radius, p.y - radius, radius * 2, radius * 2);
+          // Linear accumulation of population with one fixed normalized kernel.
+          // Display colors use log1p; raw node counts remain in the table/export.
+          const side = 256,
+            radius = 9,
+            sigma = 3,
+            field = new Float64Array(side * side),
+            kernel = [];
+          let norm = 0;
+          for (let i = -radius; i <= radius; i++) {
+            const value = Math.exp((-i * i) / (2 * sigma * sigma));
+            kernel.push(value);
+            norm += value;
           }
-          ctx.restore();
+          for (let i = 0; i < kernel.length; i++) kernel[i] /= norm;
+          for (const p of positions) {
+            const x = Math.round((p.x / width) * (side - 1)),
+              y = Math.round((p.y / height) * (side - 1));
+            for (let dy = -radius; dy <= radius; dy++) {
+              const yy = y + dy;
+              if (yy < 0 || yy >= side) continue;
+              for (let dx = -radius; dx <= radius; dx++) {
+                const xx = x + dx;
+                if (xx < 0 || xx >= side) continue;
+                field[yy * side + xx] +=
+                  p.node.size * kernel[dx + radius] * kernel[dy + radius];
+              }
+            }
+          }
+          let maximum = 0;
+          for (const value of field) maximum = Math.max(maximum, value);
+          const image = new ImageData(side, side),
+            stops = [
+              [16, 22, 30],
+              [39, 49, 91],
+              [125, 49, 116],
+              [230, 104, 98],
+              [252, 231, 153],
+            ];
+          for (let i = 0; i < field.length; i++) {
+            const t = maximum
+                ? (Math.log1p(field[i]) / Math.log1p(maximum)) * 4
+                : 0,
+              index = Math.min(3, Math.floor(t)),
+              fraction = t - index;
+            for (let c = 0; c < 3; c++)
+              image.data[4 * i + c] =
+                stops[index][c] * (1 - fraction) +
+                stops[index + 1][c] * fraction;
+            image.data[4 * i + 3] = 255;
+          }
+          const buffer = document.createElement("canvas");
+          buffer.width = side;
+          buffer.height = side;
+          buffer.getContext("2d").putImageData(image, 0, 0);
+          ctx.drawImage(buffer, 0, 0, width, height);
         } else {
           const maxWeight = Math.max(1, ...edges.map((e) => e[2]));
           for (const [a, b, w] of edges) {
@@ -938,7 +1037,15 @@
           top + size + 22,
         );
       }
+      let cameraScope = null;
       function update() {
+        const key = `${state.level}:${state.scope}`;
+        if (cameraScope !== key) {
+          state.zoom = 1;
+          state.panX = 0;
+          state.panY = 0;
+          cameraScope = key;
+        }
         $("level").value = state.level;
         $("back").disabled = !state.history.length;
         for (const button of document.querySelectorAll("[data-view]"))
@@ -947,6 +1054,7 @@
             button.dataset.view === state.view,
           );
         $("matrix-label").hidden = state.view !== "matrix";
+        $("threshold").disabled = state.view !== "network";
         details();
         table();
         render();
@@ -985,7 +1093,82 @@
             : `${current().nodes[best].label} · ${fmt(current().nodes[best].size)} nodes`;
         return best;
       }
+      let drag = null,
+        dragged = false;
+      canvas.onpointerdown = (event) => {
+        if (state.view === "matrix") return;
+        drag = {
+          x: event.clientX,
+          y: event.clientY,
+          panX: state.panX,
+          panY: state.panY,
+        };
+        dragged = false;
+        canvas.setPointerCapture(event.pointerId);
+      };
+      canvas.onpointermove = (event) => {
+        if (!drag) return;
+        const dx = event.clientX - drag.x,
+          dy = event.clientY - drag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 4) dragged = true;
+        if (dragged) {
+          state.panX = drag.panX + dx;
+          state.panY = drag.panY + dy;
+          render();
+        }
+      };
+      canvas.onpointerup = () => {
+        drag = null;
+      };
+      canvas.onpointercancel = () => {
+        drag = null;
+      };
+      canvas.addEventListener(
+        "wheel",
+        (event) => {
+          if (state.view === "matrix") return;
+          event.preventDefault();
+          const rect = canvas.getBoundingClientRect(),
+            [width, height] = viewport(),
+            before = state.zoom;
+          state.zoom = Math.max(
+            0.25,
+            Math.min(40, before * Math.exp(-event.deltaY * 0.0015)),
+          );
+          const factor = state.zoom / before,
+            x = event.clientX - rect.left - width / 2,
+            y = event.clientY - rect.top - height / 2 - 20;
+          state.panX = x - (x - state.panX) * factor;
+          state.panY = y - (y - state.panY) * factor;
+          render();
+        },
+        { passive: false },
+      );
+      canvas.ondblclick = () => {
+        state.zoom = 1;
+        state.panX = 0;
+        state.panY = 0;
+        render();
+      };
+      canvas.onkeydown = (event) => {
+        if (state.view === "matrix") return;
+        if (event.key === "+" || event.key === "=")
+          state.zoom = Math.min(40, state.zoom * 1.25);
+        else if (event.key === "-")
+          state.zoom = Math.max(0.25, state.zoom / 1.25);
+        else if (event.key === "ArrowLeft") state.panX -= 30;
+        else if (event.key === "ArrowRight") state.panX += 30;
+        else if (event.key === "ArrowUp") state.panY -= 30;
+        else if (event.key === "ArrowDown") state.panY += 30;
+        else return;
+        event.preventDefault();
+        render();
+      };
       canvas.onclick = (event) => {
+        if (dragged) {
+          dragged = false;
+          return;
+        }
         const id = nodeAt(event);
         if (id !== null) select(id);
       };
@@ -1004,11 +1187,14 @@
       };
       $("reset").onclick = () => {
         Object.assign(state, {
-          level: 0,
+          level: INITIAL_LEVEL,
           scope: null,
           selected: null,
           search: "",
           history: [],
+          zoom: 1,
+          panX: 0,
+          panY: 0,
         });
         $("search").value = "";
         update();
@@ -1056,23 +1242,92 @@
         a.href = image.toDataURL("image/png");
         a.click();
       };
+      function zipFiles(entries) {
+        // ZIP STORE: a small interoperable archive without a JS dependency.
+        const encoder = new TextEncoder(),
+          parts = [],
+          central = [];
+        let offset = 0,
+          centralSize = 0;
+        const crcTable = Uint32Array.from({ length: 256 }, (_, i) => {
+          let value = i;
+          for (let k = 0; k < 8; k++)
+            value = (value >>> 1) ^ (value & 1 ? 0xedb88320 : 0);
+          return value >>> 0;
+        });
+        for (const [name, content] of entries) {
+          const filename = encoder.encode(name),
+            bytes = encoder.encode(content);
+          let crc = 0xffffffff;
+          for (const byte of bytes)
+            crc = crcTable[(crc ^ byte) & 255] ^ (crc >>> 8);
+          crc = (crc ^ 0xffffffff) >>> 0;
+          const local = new Uint8Array(30),
+            l = new DataView(local.buffer);
+          l.setUint32(0, 0x04034b50, true);
+          l.setUint16(4, 20, true);
+          l.setUint16(12, 33, true); // 1980-01-01: a valid deterministic DOS date.
+          l.setUint32(14, crc, true);
+          l.setUint32(18, bytes.length, true);
+          l.setUint32(22, bytes.length, true);
+          l.setUint16(26, filename.length, true);
+          const header = new Uint8Array(46),
+            c = new DataView(header.buffer);
+          c.setUint32(0, 0x02014b50, true);
+          c.setUint16(4, 20, true);
+          c.setUint16(6, 20, true);
+          c.setUint16(14, 33, true);
+          c.setUint32(16, crc, true);
+          c.setUint32(20, bytes.length, true);
+          c.setUint32(24, bytes.length, true);
+          c.setUint16(28, filename.length, true);
+          c.setUint32(42, offset, true);
+          parts.push(local, filename, bytes);
+          central.push(header, filename);
+          offset += local.length + filename.length + bytes.length;
+          centralSize += header.length + filename.length;
+        }
+        const end = new Uint8Array(22),
+          e = new DataView(end.buffer);
+        e.setUint32(0, 0x06054b50, true);
+        e.setUint16(8, entries.length, true);
+        e.setUint16(10, entries.length, true);
+        e.setUint32(12, centralSize, true);
+        e.setUint32(16, offset, true);
+        return new Blob([...parts, ...central, end], {
+          type: "application/zip",
+        });
+      }
       $("save-csv").onclick = () => {
         const nodes = activeNodes(),
+          cell = (value) => `"${String(value).replaceAll('"', '""')}"`,
           rows = ["source,target,weight"];
         for (let i = 0; i < nodes.length; i++)
           for (let j = i; j < nodes.length; j++) {
             const w = weight(nodes[i].id, nodes[j].id);
-            if (w) rows.push(`${nodes[i].label},${nodes[j].label},${w}`);
+            if (w)
+              rows.push(`${cell(nodes[i].label)},${cell(nodes[j].label)},${w}`);
           }
-        download("summary-edges.csv", rows.join("\n") + "\n", "text/csv");
         const values = [
           "group,node_count,degree_volume,internal_edges,artificial",
           ...nodes.map(
             (n) =>
-              `${n.label},${n.size},${n.volume},${n.internal},${n.artificial}`,
+              `${cell(n.label)},${n.size},${n.volume},${n.internal},${n.artificial}`,
           ),
         ];
-        download("summary-nodes.csv", values.join("\n") + "\n", "text/csv");
+        const archive = zipFiles([
+          ["nodes.csv", values.join("\n") + "\n"],
+          ["edges.csv", rows.join("\n") + "\n"],
+          [
+            "README.txt",
+            "Exact induced aggregate counts for the visible groups. Line filtering does not remove exported pairs. Internal undirected edges are stored once as diagonal weights. Artificial display collections are flagged. Original graph: " +
+              DATA.graph.nodes +
+              " nodes, " +
+              DATA.graph.edges +
+              " edges.\n",
+          ],
+        ]);
+        download("summary.zip", archive, "application/zip");
       };
       async function query(path) {
         if (location.protocol === "file:") {
