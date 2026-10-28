@@ -1,0 +1,31 @@
+{
+  "config": {
+    "prepared": {
+      "delimiter": ",",
+      "graph_contract": "undirected-unweighted-simple-drop-loops-deduplicate",
+      "ignore_extra_columns": false,
+      "inputs": {
+        "edges": {
+          "mtime_ns": 1793186755814383638,
+          "path": "/home/tux/graph/largegraph-viz/data/facebook/edges.csv",
+          "sha256": "4232d2ffe0a43821f90f1ff189d92d2099fa39ff556446e282c16ce8088cb080",
+          "size": 854376
+        },
+        "nodes": null
+      },
+      "node_column": "node_id",
+      "schema": 2,
+      "source": "source",
+      "target": "target"
+    },
+    "version": 1
+  },
+  "kind": "profile",
+  "metrics": {
+    "peak_process_tree_rss_bytes": 330317824,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 35778,
+    "samples": 2,
+    "wall_seconds": 0.013385548256337643
+  }
+}

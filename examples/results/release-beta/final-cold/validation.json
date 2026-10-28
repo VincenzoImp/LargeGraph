@@ -1,0 +1,32 @@
+{
+  "all_checks_pass": true,
+  "checks": {
+    "adjacency_length_equals_2m": true,
+    "assignment_count_equals_n": true,
+    "canonical_edges": true,
+    "degree_sum_equals_2m": true,
+    "edge_rows_equal_m": true,
+    "offsets_match_degrees": true,
+    "quotient_edge_mass_equals_m": true,
+    "reported_modularity_matches": true
+  },
+  "clustering": "/home/tux/graph/largegraph-viz/runs/release-cold-final/cache/cluster-0acc33f52a26c9816e15",
+  "degree_summary": {
+    "isolates": 0,
+    "max": 6800,
+    "mean": 200.0,
+    "min": 41
+  },
+  "graph": {
+    "edges": 500000000,
+    "nodes": 5000000
+  },
+  "metrics": {
+    "peak_process_tree_rss_bytes": 592453632,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 157155,
+    "samples": 43,
+    "wall_seconds": 8.459935276769102
+  },
+  "modularity": 0.909158592907265
+}

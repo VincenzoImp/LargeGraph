@@ -549,8 +549,9 @@
       );
       const $ = (id) => document.getElementById(id),
         fmt = (n) => new Intl.NumberFormat("en").format(n);
+      const INITIAL_LEVEL = DATA.levels.length - 1;
       const state = {
-        level: 0,
+        level: INITIAL_LEVEL,
         scope: null,
         selected: null,
         view: "network",
@@ -837,7 +838,9 @@
           drawNetwork(width, height, candidates, state.view === "density");
           text(
             $("caption"),
-            `${state.view === "density" ? "Visual smoothing of exact node masses at aggregate positions. " : ""}${fmt(candidates.length)} of ${fmt(allPairs)} visible group pairs drawn · ${fmt(allExternal - shown)} external edge weight omitted from lines · ${fmt(crossBoundary)} edges cross this view’s boundary. Node areas are proportional to population. Scroll to zoom · drag to pan · double-click to fit.`,
+            state.view === "density"
+              ? "Fixed-kernel smoothing of population at aggregate positions; colors use a view-normalized log scale. Exact counts are in the table/export. Camera boundaries can clip the field. Scroll to zoom · drag to pan · double-click to fit."
+              : `${fmt(candidates.length)} of ${fmt(allPairs)} visible group pairs drawn · ${fmt(allExternal - shown)} external edge weight omitted from lines · ${fmt(crossBoundary)} edges cross this view’s boundary. Area scales with population above a 0.4 px minimum radius. Scroll to zoom · drag to pan · double-click to fit.`,
           );
         }
       }
@@ -1051,6 +1054,7 @@
             button.dataset.view === state.view,
           );
         $("matrix-label").hidden = state.view !== "matrix";
+        $("threshold").disabled = state.view !== "network";
         details();
         table();
         render();
@@ -1183,7 +1187,7 @@
       };
       $("reset").onclick = () => {
         Object.assign(state, {
-          level: 0,
+          level: INITIAL_LEVEL,
           scope: null,
           selected: null,
           search: "",
@@ -1262,6 +1266,7 @@
             l = new DataView(local.buffer);
           l.setUint32(0, 0x04034b50, true);
           l.setUint16(4, 20, true);
+          l.setUint16(12, 33, true); // 1980-01-01: a valid deterministic DOS date.
           l.setUint32(14, crc, true);
           l.setUint32(18, bytes.length, true);
           l.setUint32(22, bytes.length, true);
@@ -1271,6 +1276,7 @@
           c.setUint32(0, 0x02014b50, true);
           c.setUint16(4, 20, true);
           c.setUint16(6, 20, true);
+          c.setUint16(14, 33, true);
           c.setUint32(16, crc, true);
           c.setUint32(20, bytes.length, true);
           c.setUint32(24, bytes.length, true);

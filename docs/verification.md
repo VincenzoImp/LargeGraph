@@ -1,5 +1,9 @@
 # Measured verification
 
+The [0.2 workbench evidence](verification-beta.md) covers the new interactive,
+recovery, profile and index workflow. The measurements below retain the original
+0.1 experiment and its producing environment.
+
 All results below were executed on 2026-10-28. Raw reports and representative
 figures are committed under `examples/results`, `examples/measurements` and
 `examples/figures`. The exact weighted community graph of the full run is in

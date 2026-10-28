@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import re
 import shutil
 from pathlib import Path
 
+from .config import AnalysisOptions
 from .runtime import Resources
 
 
@@ -33,7 +35,15 @@ def available_memory() -> int:
         limit = (root / "memory.max").read_text().strip()
         current = int((root / "memory.current").read_text())
         if limit != "max":
-            available = min(available, max(0, int(limit) - current))
+            inactive_file = 0
+            with contextlib.suppress(OSError, ValueError):
+                statistics = dict(
+                    line.split() for line in (root / "memory.stat").read_text().splitlines()
+                )
+                inactive_file = int(statistics.get("inactive_file", 0))
+            # A full input hash can populate the cgroup with reclaimable file
+            # pages. Treating that cache as live arrays falsely reports no RAM.
+            available = min(available, int(limit), max(0, int(limit) - current + inactive_file))
     except (OSError, ValueError, StopIteration):
         pass
     return available
@@ -49,7 +59,12 @@ def default_resources(ram: str = "8GB", threads: int = 2) -> Resources:
 
 
 def preflight(
-    input_path: Path, output: Path, resources: Resources, ram: str = "8GB", delimiter=","
+    input_path: Path,
+    output: Path,
+    resources: Resources,
+    ram: str = "8GB",
+    delimiter=",",
+    options: AnalysisOptions | None = None,
 ) -> dict:
     """Inspect at most 1 MiB of CSV, or Parquet metadata; do not load graph arrays."""
     input_path = input_path.resolve(strict=True)
@@ -73,9 +88,32 @@ def preflight(
         sample_rows = sum(1 for _ in records)
         rows = round(sample_rows * input_bytes / max(1, len(raw)))
         basis = "CSV byte sample; multiline records and ID lengths can change the estimate"
+    if options is not None:
+        if options.source not in columns or options.target not in columns:
+            raise ValueError(
+                f"Input columns {columns} do not contain {options.source!r}, {options.target!r}"
+            )
+        if len(columns) != 2 and not options.ignore_extra_columns:
+            raise ValueError(
+                "Extra input columns require --ignore-extra-columns; weights/directions are not inferred"
+            )
+        if options.nodes_file:
+            node_path = options.nodes_file.resolve(strict=True)
+            if node_path.suffix.lower() in {".parquet", ".pq"}:
+                import pyarrow.parquet as pq
+
+                node_columns = pq.ParquetFile(node_path).schema.names
+            else:
+                with node_path.open(encoding="utf-8-sig", newline="") as stream:
+                    node_columns = next(csv.reader(stream, delimiter=delimiter), [])
+            if options.node_column not in node_columns:
+                raise ValueError(f"Node file lacks column {options.node_column!r}")
     location = output.resolve()
     while not location.exists():
-        location = location.parent
+        parent = location.parent
+        if parent == location:
+            raise ValueError(f"Workspace volume is not available: {output}")
+        location = parent
     free = shutil.disk_usage(location).free
     # Scratch tables + final symmetric uint32 adjacency + input. Deliberately rough.
     estimated_disk = max(input_bytes * 5, rows * 100)

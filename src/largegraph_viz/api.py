@@ -137,7 +137,7 @@ def analyze(
                         raise ValueError(f"Invalid artifact {path}: {check['errors']}")
                 LOG.info("Analysis is complete; reusing %s", result.report)
                 return result
-        plan = preflight(Path(input_path), work_dir, resources, ram, options.delimiter)
+        plan = preflight(Path(input_path), work_dir, resources, ram, options.delimiter, options)
         for warning in plan["warnings"]:
             LOG.warning("Preflight: %s", warning)
         write_json(output / "preflight.json", plan)

@@ -29,6 +29,15 @@ class AnalysisOptions:
     images: bool = False
 
     def __post_init__(self) -> None:
+        for name in ("passes", "max_groups", "max_edges", "pixels", "seed"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise ValueError(f"{name} must be an integer")
+        for name in ("ignore_extra_columns", "hash_input", "images"):
+            if not isinstance(getattr(self, name), bool):
+                raise ValueError(f"{name} must be a boolean")
+        if not 0 <= self.seed < 2**31:
+            raise ValueError("seed must be between 0 and 2^31-1 for the supported backends")
         if not self.source or not self.target or self.source == self.target:
             raise ValueError("source and target must be distinct nonempty column names")
         if len(self.delimiter.encode()) != 1:
@@ -40,7 +49,8 @@ class AnalysisOptions:
         if self.max_edges < 0 or not 64 <= self.pixels <= 4096:
             raise ValueError("max_edges must be nonnegative and pixels must be between 64 and 4096")
         if not self.hierarchy_targets or any(
-            not 2 <= item <= 1024 for item in self.hierarchy_targets
+            not isinstance(item, int) or isinstance(item, bool) or not 2 <= item <= 1024
+            for item in self.hierarchy_targets
         ):
             raise ValueError("hierarchy_targets must contain values between 2 and 1024")
         if self.backend not in {"streaming", "clustre", "leiden", "networkit"}:

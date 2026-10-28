@@ -56,6 +56,9 @@ does not affect artifacts or the original CSV.
 Explicit CLI flags override config values. Resource controls (`ram`, `memory`,
 `threads`, `batch_rows`, spill directory) are separate CLI flags or `Resources`
 fields. Path values in JSON resolve from the working directory, just like flags.
+`max_groups` caps static figures and artificial reductions of a large
+disconnected forest; actual interactive cuts and fine partitions are included up
+to the fixed browser safety cap of 1,024 groups per level.
 Different analysis options require a new run directory. Compatible preparation
 artifacts can still be shared using the same work directory.
 
@@ -92,5 +95,7 @@ Importing `largegraph_viz` does not import Matplotlib, Arrow, NumPy or Numba.
 The CLI configures thread environment variables before scientific imports. An
 embedding application that already initialized a BLAS runtime should configure
 its own thread policy. Static plotting uses a local Matplotlib style context.
-The bounded layout starts from explicit seed coordinates without replacing
-igraph's global random-number generator.
+The bounded layout seeds igraph in an isolated worker. This avoids replacing
+an embedding application's global RNG and controls igraph's internal jitter.
+Layout reproducibility is evaluated within the recorded library/platform build;
+bitwise identity across different native-library versions is not promised.

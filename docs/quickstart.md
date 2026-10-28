@@ -31,6 +31,7 @@ Optional features are selected explicitly:
 | --- | --- |
 | `images` | Matplotlib/SciPy PNG, PDF, SVG exports and coordinate raster mode |
 | `leiden` | Bounded Leiden backend and reference comparisons |
+| `networkit` | Bounded parallel Louvain backend (Linux/macOS) |
 | `validation` | Adjusted mutual information using scikit-learn |
 | `clustre-build` | Linux MPI build dependency for external CluStRE |
 
@@ -61,9 +62,10 @@ Use `--port 0` to choose a free local port.
 Network, matrix and density share the selected group. Choose a coarser hierarchy
 level, select a group and click **Explore children**. The table supports keyboard
 selection. Search filters group labels; node lookup searches exact original IDs.
-The caption reports represented nodes, hidden link weight and boundary edges.
-**Export view** downloads nodes and the induced weighted summary, including
-internal edges. **Save image** downloads the current canvas.
+Scroll to zoom, drag to pan, and double-click to fit the graph. The caption
+reports represented nodes, hidden link weight and boundary edges.
+**Export view** downloads one ZIP with nodes and the induced weighted summary,
+including internal edges. **Save image** downloads the current canvas.
 
 ## Input choices
 
@@ -122,6 +124,9 @@ edges. A diagonal weight stores each internal undirected edge once.
 and `--resolution` change its budget/objective. It is order-sensitive and does
 not guarantee connected or optimal communities. For a graph that fits the
 explicit 100,000-node / 2,000,000-edge safety caps, install `leiden` and choose
-`--backend leiden`. See [CluStRE](clustre.md) for the external streaming backend.
+`--backend leiden`. NetworKit PLM is available through the `networkit` extra and
+`--backend networkit` on supported platforms. Its parallel scheduling may change
+results despite a fixed seed. See [CluStRE](clustre.md) for the external streaming
+backend and [real comparisons](comparisons.md) for quality/time tradeoffs.
 Do not compare wall times for different algorithms without also comparing
 partition quality, preprocessing and memory.

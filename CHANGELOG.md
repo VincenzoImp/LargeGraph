@@ -12,8 +12,9 @@
 - Resume preparation phases and native clustering passes. Lock cache reuse,
   retain immutable completed reports and record file checksum baselines.
 - Add resource preflight, a bundled reproducible demo, shared configuration and
-  a bounded optional Leiden backend. Preserve explicit undirected simple-graph
+  bounded optional Leiden/NetworKit backends. Preserve explicit undirected simple-graph
   semantics and count/approximation disclosures.
+- Seed igraph in a worker for reproducible layouts without global RNG changes.
 - Reduce the base to six direct runtime dependencies. Move figures, Leiden and
   extended validation to extras; standardize contributor/CI workflows on uv.
 - Add recovery/browser/package tests, contributor documentation, issue templates

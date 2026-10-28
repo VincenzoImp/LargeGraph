@@ -38,6 +38,7 @@ def test_report_links_views_drills_down_and_exports(tmp_path):
         page.locator("#canvas").focus()
         page.keyboard.press("+")
         assert page.evaluate("window.largegraph.state.zoom > 1")
+        page.locator("#level").select_option("0")
         page.locator("#group-rows button").first.click()
         selected = page.locator("#group-title").inner_text()
         page.get_by_role("button", name="Matrix", exact=True).click()
