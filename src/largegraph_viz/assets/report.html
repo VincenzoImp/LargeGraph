@@ -549,8 +549,9 @@
       );
       const $ = (id) => document.getElementById(id),
         fmt = (n) => new Intl.NumberFormat("en").format(n);
+      const INITIAL_LEVEL = DATA.levels.length - 1;
       const state = {
-        level: 0,
+        level: INITIAL_LEVEL,
         scope: null,
         selected: null,
         view: "network",
@@ -1183,7 +1184,7 @@
       };
       $("reset").onclick = () => {
         Object.assign(state, {
-          level: 0,
+          level: INITIAL_LEVEL,
           scope: null,
           selected: null,
           search: "",
