@@ -1,0 +1,11 @@
+{
+  "nodes": 10000,
+  "edges": 100000,
+  "communities": 12,
+  "mixing": 0.08,
+  "seed": 42,
+  "scenario": "communities",
+  "memory": "512MB",
+  "threads": 2,
+  "batch_rows": 25000
+}

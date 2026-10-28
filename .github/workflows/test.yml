@@ -1,0 +1,79 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  python:
+    name: Python ${{ matrix.python }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.12", "3.13"]
+        include:
+          - os: macos-latest
+            python: "3.12"
+          - os: windows-latest
+            python: "3.12"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.28"
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: uv sync --locked --extra images --extra leiden --extra validation
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check src tests
+      - run: uv run --no-sync pytest -q -m "not browser"
+      - run: uv run --no-sync largegraph demo --output runs/ci-demo --images
+      - run: uv run --no-sync largegraph verify runs/ci-demo --deep
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: demo-${{ matrix.os }}-${{ matrix.python }}
+          path: runs/ci-demo/report
+  browser-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --locked --extra images --extra leiden --extra validation --group browser
+      - run: uv run --no-sync mypy
+      - run: uv run --no-sync playwright install --with-deps chromium
+      - run: uv run --no-sync pytest -q -m browser
+      - run: uv build
+      - run: uv run --no-sync twine check --strict dist/*
+      - name: Install the base wheel in a clean environment
+        run: |
+          uv venv /tmp/largegraph-wheel --python 3.12
+          uv pip install --python /tmp/largegraph-wheel/bin/python dist/*.whl
+          cd /tmp
+          /tmp/largegraph-wheel/bin/largegraph demo --output packaged-demo
+          /tmp/largegraph-wheel/bin/largegraph verify packaged-demo --deep
+      - uses: actions/upload-artifact@v7
+        with:
+          name: distributions
+          path: dist/*
+      - uses: actions/download-artifact@v8
+        with:
+          name: distributions
+          path: artifact-roundtrip/
+      - name: Verify distribution upload and download preserve every byte
+        run: |
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          original = [*Path("dist").glob("*.whl"), *Path("dist").glob("*.tar.gz")]
+          received = list(Path("artifact-roundtrip").iterdir())
+          assert len(original) == 2
+          assert {p.name for p in received} == {p.name for p in original}
+          assert all((Path("artifact-roundtrip") / p.name).read_bytes() == p.read_bytes() for p in original)
+          PY

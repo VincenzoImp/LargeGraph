@@ -1,0 +1,36 @@
+{
+  "config": {
+    "prepared": {
+      "delimiter": ",",
+      "graph_contract": "undirected-unweighted-simple-drop-loops-deduplicate",
+      "ignore_extra_columns": false,
+      "inputs": {
+        "edges": {
+          "mtime_ns": 1793177736308577064,
+          "path": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/edges.csv",
+          "sha256": "17b9293a4341106ca0ddd1b2c6b4dd86467155ff5649c8b8b9caacb05404d000",
+          "size": 7777974671
+        },
+        "nodes": {
+          "mtime_ns": 1793177255213390428,
+          "path": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+          "sha256": "4bd9f66db92e98da2fe0ea65d0fb463cf15c94ba7de3bce3ba9124d7e99fa240",
+          "size": 57930118
+        }
+      },
+      "node_column": "node_id",
+      "schema": 2,
+      "source": "source",
+      "target": "target"
+    },
+    "version": 2
+  },
+  "kind": "profile",
+  "metrics": {
+    "peak_process_tree_rss_bytes": 618348544,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 43561901,
+    "samples": 27,
+    "wall_seconds": 5.484781074337661
+  }
+}

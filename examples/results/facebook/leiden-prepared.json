@@ -1,0 +1,70 @@
+{
+  "adjacency": {
+    "dtype": "little-endian uint32",
+    "index_base": 0,
+    "sorted_by": [
+      "source",
+      "target"
+    ],
+    "symmetric": true
+  },
+  "config": {
+    "delimiter": ",",
+    "graph_contract": "undirected-unweighted-simple-drop-loops-deduplicate",
+    "ignore_extra_columns": false,
+    "inputs": {
+      "edges": {
+        "mtime_ns": 1793186755814383638,
+        "path": "/home/tux/graph/largegraph-viz/data/facebook/edges.csv",
+        "sha256": "4232d2ffe0a43821f90f1ff189d92d2099fa39ff556446e282c16ce8088cb080",
+        "size": 854376
+      },
+      "nodes": null
+    },
+    "node_column": "node_id",
+    "schema": 2,
+    "source": "source",
+    "target": "target"
+  },
+  "dropped_duplicate_rows": 0,
+  "dropped_self_loops": 0,
+  "edges": 88234,
+  "environment": {
+    "logical_cpus": 32,
+    "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.12.13",
+    "versions": {
+      "duckdb": "1.5.6",
+      "igraph": "1.0.0",
+      "largegraph-viz": "0.2.0b1",
+      "leidenalg": "0.12.0",
+      "matplotlib": "3.11.2",
+      "numba": "0.68.1",
+      "numpy": "2.5.4",
+      "psutil": "7.2.2",
+      "pyarrow": "24.0.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    }
+  },
+  "input_rows": 88234,
+  "isolated_nodes": 0,
+  "kind": "prepared",
+  "metrics": {
+    "peak_process_tree_rss_bytes": 219176960,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 932704,
+    "samples": 2,
+    "wall_seconds": 0.1673386637121439
+  },
+  "nodes": 4039,
+  "recovery": "completed preparation phases reused; interrupted phase restarts",
+  "resources": {
+    "batch_rows": 250000,
+    "memory": "256MB",
+    "temp_dir": null,
+    "temp_limit": "80GB",
+    "threads": 2
+  }
+}

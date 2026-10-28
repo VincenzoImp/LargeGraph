@@ -1,0 +1,21 @@
+{
+  "components": 1,
+  "degree_quantiles": {
+    "0": 41.0,
+    "100": 6800.0,
+    "25": 94.0,
+    "50": 122.0,
+    "75": 191.0,
+    "90": 343.0,
+    "99": 1398.0
+  },
+  "edge_density": 4.00000080000016e-05,
+  "edges": 500000000,
+  "isolated_nodes": 0,
+  "largest_component_fraction": 1.0,
+  "largest_component_nodes": 5000000,
+  "max_degree": 6800,
+  "mean_degree": 200.0,
+  "nodes": 5000000,
+  "statistics": "exact counts; quantiles use NumPy linear interpolation"
+}

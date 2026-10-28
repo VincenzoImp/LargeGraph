@@ -1,0 +1,15 @@
+name: Feature request
+description: Describe a graph task the current workbench cannot handle well
+body:
+  - type: textarea
+    attributes:
+      label: User task
+      description: What would you like to accomplish? Include graph size, semantics and resource constraints.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Desired workflow
+      description: An example command, interaction or export, and what you use today.
+    validations:
+      required: true
