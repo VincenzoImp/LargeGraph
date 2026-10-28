@@ -111,8 +111,12 @@ def test_layout_is_seeded_without_mutating_process_rng():
     assert random.getstate() == state
 
 
-def test_optional_networkit_backend_runs_in_a_bounded_worker(tmp_path):
-    pytest.importorskip("networkit")
+@pytest.mark.parametrize(
+    "backend,package,method",
+    [("networkit", "networkit", "NetworKit"), ("leiden", "leidenalg", "Leiden")],
+)
+def test_optional_bounded_backends(tmp_path, backend, package, method):
+    pytest.importorskip(package)
     from largegraph_viz import AnalysisOptions
 
     edges = tmp_path / "edges.csv"
@@ -120,11 +124,11 @@ def test_optional_networkit_backend_runs_in_a_bounded_worker(tmp_path):
     result = analyze(
         edges,
         tmp_path / "run",
-        options=AnalysisOptions(backend="networkit"),
+        options=AnalysisOptions(backend=backend),
         resources=Resources(memory="128MB", threads=1),
     )
     meta = read_json(result.clustering / "manifest.json")
-    assert "NetworKit" in meta["algorithm"]
+    assert method in meta["algorithm"]
     assert meta["modularity"] > 0.3
     assert read_json(result.report.parent / "validation/validation.json")["all_checks_pass"]
 
