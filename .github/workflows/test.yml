@@ -63,3 +63,17 @@ jobs:
         with:
           name: distributions
           path: dist/*
+      - uses: actions/download-artifact@v8
+        with:
+          name: distributions
+          path: artifact-roundtrip/
+      - name: Verify distribution upload and download preserve every byte
+        run: |
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          original = [*Path("dist").glob("*.whl"), *Path("dist").glob("*.tar.gz")]
+          received = list(Path("artifact-roundtrip").iterdir())
+          assert len(original) == 2
+          assert {p.name for p in received} == {p.name for p in original}
+          assert all((Path("artifact-roundtrip") / p.name).read_bytes() == p.read_bytes() for p in original)
+          PY
