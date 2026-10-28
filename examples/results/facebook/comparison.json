@@ -1,0 +1,374 @@
+{
+  "results": [
+    {
+      "backend": "streaming",
+      "common_quality_evaluation_seconds": 0.0007850974798202515,
+      "communities": 101,
+      "detector_seconds": 0.13218812551349401,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 239632384,
+      "fresh_process_wall_seconds": 0.36006642039865255,
+      "graph_load_and_backend_import_seconds": 7.82310962677002e-07,
+      "modularity": 0.8104221086524119,
+      "nodes": 4039,
+      "parameters": {
+        "jit": "cache state depends on installation; detector timer includes JIT startup",
+        "order": "lexicographic compact ID",
+        "passes": 5
+      },
+      "process_peak_rss_bytes": 238551040,
+      "seed": 42,
+      "threads": 2
+    },
+    {
+      "backend": "streaming",
+      "common_quality_evaluation_seconds": 0.0007613934576511383,
+      "communities": 101,
+      "detector_seconds": 0.13190859276801348,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 231600128,
+      "fresh_process_wall_seconds": 0.35118641424924135,
+      "graph_load_and_backend_import_seconds": 7.627531886100769e-07,
+      "modularity": 0.8104221086524119,
+      "nodes": 4039,
+      "parameters": {
+        "jit": "cache state depends on installation; detector timer includes JIT startup",
+        "order": "lexicographic compact ID",
+        "passes": 5
+      },
+      "process_peak_rss_bytes": 230998016,
+      "seed": 43,
+      "threads": 2
+    },
+    {
+      "backend": "streaming",
+      "common_quality_evaluation_seconds": 0.0007791072130203247,
+      "communities": 101,
+      "detector_seconds": 0.13184063602238894,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 231665664,
+      "fresh_process_wall_seconds": 0.35843729600310326,
+      "graph_load_and_backend_import_seconds": 4.7031790018081665e-07,
+      "modularity": 0.8104221086524119,
+      "nodes": 4039,
+      "parameters": {
+        "jit": "cache state depends on installation; detector timer includes JIT startup",
+        "order": "lexicographic compact ID",
+        "passes": 5
+      },
+      "process_peak_rss_bytes": 231723008,
+      "seed": 44,
+      "threads": 2
+    },
+    {
+      "backend": "leiden",
+      "common_quality_evaluation_seconds": 0.0012565581128001213,
+      "communities": 16,
+      "detector_seconds": 0.5030118823051453,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 228237312,
+      "fresh_process_wall_seconds": 0.9113373123109341,
+      "graph_load_and_backend_import_seconds": 0.18147294130176306,
+      "modularity": 0.8357107181826293,
+      "nodes": 4039,
+      "parameters": {
+        "iterations": 5,
+        "resolution": 1,
+        "seed": 42
+      },
+      "process_peak_rss_bytes": 227295232,
+      "seed": 42,
+      "threads": 2
+    },
+    {
+      "backend": "leiden",
+      "common_quality_evaluation_seconds": 0.0012613683938980103,
+      "communities": 14,
+      "detector_seconds": 0.5101652331650257,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 228052992,
+      "fresh_process_wall_seconds": 0.9093036008998752,
+      "graph_load_and_backend_import_seconds": 0.18498625792562962,
+      "modularity": 0.8355718775466672,
+      "nodes": 4039,
+      "parameters": {
+        "iterations": 5,
+        "resolution": 1,
+        "seed": 43
+      },
+      "process_peak_rss_bytes": 227901440,
+      "seed": 43,
+      "threads": 2
+    },
+    {
+      "backend": "leiden",
+      "common_quality_evaluation_seconds": 0.001325087621808052,
+      "communities": 15,
+      "detector_seconds": 0.5182522684335709,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 228196352,
+      "fresh_process_wall_seconds": 0.9131092634052038,
+      "graph_load_and_backend_import_seconds": 0.1801092717796564,
+      "modularity": 0.8357324758326268,
+      "nodes": 4039,
+      "parameters": {
+        "iterations": 5,
+        "resolution": 1,
+        "seed": 44
+      },
+      "process_peak_rss_bytes": 227864576,
+      "seed": 44,
+      "threads": 2
+    },
+    {
+      "backend": "networkit",
+      "common_quality_evaluation_seconds": 0.0012652650475502014,
+      "communities": 16,
+      "components": 1,
+      "detector_seconds": 0.007029308006167412,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 293765120,
+      "fresh_process_wall_seconds": 0.8440159754827619,
+      "graph_load_and_backend_import_seconds": 0.5514118345454335,
+      "modularity": 0.8355854324296075,
+      "networkit_version": "11.2.2",
+      "nodes": 4039,
+      "parameters": {
+        "gamma": 1,
+        "maxIter": 32,
+        "par": "balanced",
+        "recurse": true,
+        "refine": true,
+        "seed": 42,
+        "turbo": true
+      },
+      "process_peak_rss_bytes": 293220352,
+      "seed": 42,
+      "threads": 2
+    },
+    {
+      "backend": "networkit",
+      "common_quality_evaluation_seconds": 0.0013909190893173218,
+      "communities": 16,
+      "components": 1,
+      "detector_seconds": 0.006969918496906757,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 297992192,
+      "fresh_process_wall_seconds": 0.8477838588878512,
+      "graph_load_and_backend_import_seconds": 0.5516912871971726,
+      "modularity": 0.8355854324296075,
+      "networkit_version": "11.2.2",
+      "nodes": 4039,
+      "parameters": {
+        "gamma": 1,
+        "maxIter": 32,
+        "par": "balanced",
+        "recurse": true,
+        "refine": true,
+        "seed": 43,
+        "turbo": true
+      },
+      "process_peak_rss_bytes": 297492480,
+      "seed": 43,
+      "threads": 2
+    },
+    {
+      "backend": "networkit",
+      "common_quality_evaluation_seconds": 0.0013835253193974495,
+      "communities": 16,
+      "components": 1,
+      "detector_seconds": 0.006791603751480579,
+      "edges": 88234,
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.2.0b1",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "final_process_rss_bytes": 293953536,
+      "fresh_process_wall_seconds": 0.8428482124581933,
+      "graph_load_and_backend_import_seconds": 0.5524357073009014,
+      "modularity": 0.8355854324296075,
+      "networkit_version": "11.2.2",
+      "nodes": 4039,
+      "parameters": {
+        "gamma": 1,
+        "maxIter": 32,
+        "par": "balanced",
+        "recurse": true,
+        "refine": true,
+        "seed": 44,
+        "turbo": true
+      },
+      "process_peak_rss_bytes": 293351424,
+      "seed": 44,
+      "threads": 2
+    }
+  ],
+  "scope": "Bounded detector comparison from identical canonical prepared edges; preparation/report excluded. Algorithm budgets differ. Native sequential order is fixed across seeds. JIT cache and OS page cache were not flushed. No ground-truth partition is assumed."
+}

@@ -1,4 +1,7 @@
-include LICENSE README.md CITATION.cff CHANGELOG.md
+include uv.lock .python-version
+include LICENSE README.md CITATION.cff CHANGELOG.md THIRD_PARTY_NOTICES.md CONTRIBUTING.md SECURITY.md
+recursive-include docs *.md *.bib
+recursive-include scripts *.py
 recursive-include src/largegraph_viz/assets *.csv *.html
 include src/largegraph_viz/py.typed
 recursive-include tests *.py

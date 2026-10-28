@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -184,7 +185,7 @@ def cluster_graph(
     if backend == "clustre":
         config["seed"] = seed
         config["adapter_version"] = 2
-    if backend == "leiden":
+    if backend in {"leiden", "networkit"}:
         config["seed"] = seed
     destination = prepared.parent / ("cluster-" + signature(config)[:20])
     with cached_directory(destination) as out:
@@ -207,6 +208,37 @@ def cluster_graph(
                     prepared, out, clustre_binary, clustre_mode, resources, seed
                 )
                 algorithm = "CluStRE external binary"
+            elif backend == "networkit":
+                meta = read_json(prepared / "manifest.json")
+                if meta["nodes"] > 100_000 or meta["edges"] > 2_000_000:
+                    raise ValueError(
+                        "NetworKit backend is bounded to 100,000 nodes and 2,000,000 edges; choose streaming for larger inputs"
+                    )
+                import json
+
+                run = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "largegraph_viz._networkit_worker",
+                        str(prepared),
+                        str(out / "labels.npy"),
+                        "--seed",
+                        str(seed),
+                        "--threads",
+                        str(resources.threads),
+                        "--passes",
+                        str(passes),
+                        "--resolution",
+                        str(resolution),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                labels = np.load(out / "labels.npy")
+                history = json.loads(run.stdout)
+                algorithm = "NetworKit parallel Louvain with refinement (bounded worker)"
             elif backend == "leiden":
                 meta = read_json(prepared / "manifest.json")
                 if meta["nodes"] > 100_000 or meta["edges"] > 2_000_000:

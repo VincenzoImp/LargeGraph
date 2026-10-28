@@ -38,13 +38,14 @@ def report_data(
             "hierarchy",
         )
         for cut in tree["cuts"]
+        if cut["groups"] < meta["communities"] or meta["communities"] > 1024
     ]
     fine_count = meta["communities"]
     if fine_count <= 1024:
         entries.append((quotient, np.arange(fine_count, dtype=np.uint32), "detected"))
     elif not entries:
         entries.append((quotient, np.arange(fine_count, dtype=np.uint32), "display"))
-    levels, previous_global, previous_coords = [], None, None
+    levels, previous_global = [], None
     for path, fine_mapping, kind in entries:
         size = read_json(path / "manifest.json")["communities"]
         # Genuine cuts are shown in full up to the browser safety cap. A large
@@ -62,23 +63,22 @@ def report_data(
         coords, engine = layout(reduction["weights"], seed)
         parents = np.full(count, -1, dtype=int)
         if previous_global is not None:
-            for child in range(count):
-                unique = np.unique(previous_global[global_mapping == child])
-                if len(unique) == 1:
-                    parents[child] = int(unique[0])
-            # Embed children near their parent; preserve the coarse map's context.
-            if np.all(parents >= 0):
-                for parent in np.unique(parents):
-                    selected = np.flatnonzero(parents == parent)
-                    local = coords[selected] - coords[selected].mean(axis=0)
-                    radius = max(1, float(np.linalg.norm(local, axis=1).max(initial=0)))
-                    coords[selected] = previous_coords[parent] + local / radius * 0.25 ** len(
-                        levels
-                    )
-        else:
-            coords -= coords.mean(axis=0)
-            coords /= max(1, float(np.linalg.norm(coords, axis=1).max(initial=0)))
+            # One O(k) reduction, rather than scanning all fine groups once for
+            # each child. Fragmented large graphs can have millions of groups.
+            lower = np.full(count, len(levels[-1]["nodes"]), dtype=np.uint32)
+            upper = np.zeros(count, dtype=np.uint32)
+            np.minimum.at(lower, global_mapping, previous_global)
+            np.maximum.at(upper, global_mapping, previous_global)
+            unique_parent = lower == upper
+            parents[unique_parent] = lower[unique_parent]
+        # Overview geometry uses this level's topology. Navigation carries exact
+        # parent IDs; forcing every child close to a giant single-linkage parent
+        # would obscure its structure and create artificial visual overlap.
+        coords -= coords.mean(axis=0)
+        coords /= max(1, float(np.linalg.norm(coords, axis=1).max(initial=0)))
         mass = np.bincount(global_mapping, minlength=count)
+        first = np.full(count, fine_count, dtype=np.uint32)
+        np.minimum.at(first, global_mapping, np.arange(fine_count, dtype=np.uint32))
         nodes = []
         for i in range(count):
             artificial = bool(reduction["artificial_other"] and i == count - 1)
@@ -96,7 +96,7 @@ def report_data(
                     "internal": int(reduction["weights"][i, i]),
                     "groups": int(mass[i]),
                     "parent": int(parents[i]),
-                    "leaf": original if kind == "detected" and not artificial else None,
+                    "leaf": int(first[i]) if mass[i] == 1 and not artificial else None,
                     "artificial": artificial,
                     "x": float(coords[i, 0]),
                     "y": float(coords[i, 1]),
@@ -115,12 +115,13 @@ def report_data(
                 "edges": [
                     [int(u), int(v), int(weight)] for u, v, weight in zip(a, b, w, strict=True)
                 ],
+                "edge_cap": max_edges,
                 "filtering": filtering,
                 "layout": engine,
                 "artificial_other": reduction["artificial_other"],
             }
         )
-        previous_global, previous_coords = global_mapping, coords
+        previous_global = global_mapping
     return {
         "schema": 1,
         "graph": {

@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>largegraph-viz · Graph explorer</title>
+    <style>
+      [hidden] {
+        display: none !important;
+      }
+      :root {
+        --bg: #10161e;
+        --surface: #18212c;
+        --line: #2b3948;
+        --text: #eef3f7;
+        --muted: #a1b0c0;
+        --accent: #74e5c2;
+        --blue: #80b8ff;
+        --warn: #f8c783;
+        color-scheme: dark;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+        color: inherit;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 8px 12px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover,
+      button[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      a {
+        color: var(--accent);
+      }
+      header {
+        padding: 24px 32px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
+      }
+      .brand {
+        font-size: 22px;
+        font-weight: 750;
+        letter-spacing: -0.5px;
+      }
+      .brand span {
+        color: var(--accent);
+      }
+      .muted,
+      small {
+        color: var(--muted);
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      h1 {
+        font-size: 30px;
+        line-height: 1.2;
+        margin: 8px 0;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0 0 14px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 20px 32px;
+      }
+      .metric {
+        padding: 14px 18px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .metric strong {
+        font-size: 25px;
+        display: block;
+        font-variant-numeric: tabular-nums;
+      }
+      .metric span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      main {
+        padding: 0 32px 28px;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .toolbar .spacer {
+        flex: 1;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+      }
+      label {
+        color: var(--muted);
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 290px;
+        gap: 16px;
+      }
+      .stage {
+        position: relative;
+        background: radial-gradient(ellipse at 50% 40%, #1c2a37, var(--bg) 80%);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        min-width: 0;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 560px;
+        cursor: crosshair;
+      }
+      .stage-title {
+        position: absolute;
+        top: 16px;
+        left: 18px;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .stage-title strong {
+        display: block;
+        font-size: 16px;
+      }
+      .stage-title span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .stage-note {
+        padding: 12px 18px;
+        border-top: 1px solid var(--line);
+        font-size: 12px;
+        color: var(--muted);
+        min-height: 60px;
+      }
+      aside {
+        background: var(--surface);
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        min-width: 0;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .detail-grid strong {
+        display: block;
+        font-size: 18px;
+      }
+      .detail-grid small {
+        font-size: 11px;
+      }
+      .detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      #group-title {
+        font-size: 20px;
+        overflow-wrap: anywhere;
+      }
+      #detail-copy {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .table-panel {
+        margin-top: 18px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .table-head {
+        padding: 14px 18px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .table-head h2 {
+        margin: 0;
+      }
+      .table-scroll {
+        max-height: 280px;
+        overflow: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      th,
+      td {
+        padding: 9px 18px;
+        text-align: right;
+        border-top: 1px solid var(--line);
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+      thead th {
+        color: var(--muted);
+        position: sticky;
+        top: 0;
+        background: var(--surface);
+      }
+      tr[data-id] {
+        cursor: pointer;
+      }
+      tr[data-id]:hover,
+      tr.selected {
+        background: #263b44;
+      }
+      .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 9px;
+      }
+      .footer {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        padding-top: 24px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      details {
+        margin-top: 10px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--text);
+      }
+      #node-form {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      #node-id {
+        min-width: 0;
+        width: 100%;
+      }
+      #node-results {
+        max-height: 220px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 11px;
+      }
+      #status {
+        color: var(--warn);
+        font-size: 12px;
+        min-height: 18px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        color: var(--accent);
+        border: 1px solid #355b51;
+        border-radius: 20px;
+        font-size: 10px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .help {
+        max-width: 800px;
+      }
+      .sr-only {
+        position: absolute;
+        left: -10000px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+      @media (max-width: 1000px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr) 240px;
+        }
+        header,
+        main {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+        .metrics {
+          padding: 16px 18px;
+          gap: 8px;
+        }
+        .metric strong {
+          font-size: 20px;
+        }
+        canvas {
+          height: 480px;
+        }
+      }
+      @media (max-width: 720px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+        .metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+        .footer {
+          grid-template-columns: 1fr;
+        }
+        header {
+          align-items: start;
+        }
+        .header-info {
+          display: none;
+        }
+        canvas {
+          height: 440px;
+        }
+        .table-head {
+          flex-wrap: wrap;
+        }
+        .toolbar .spacer {
+          display: none;
+        }
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="brand">largegraph<span>·</span>viz</div>
+        <div class="muted">Big structure. Small memory.</div>
+      </div>
+      <div class="header-info">
+        <span class="badge">Local graph explorer</span>
+        <div class="muted" style="font-size: 12px; margin-top: 7px">
+          CPU only · all-edge counts · portable report
+        </div>
+      </div>
+    </header>
+    <section class="metrics" aria-label="Graph overview" id="metrics"></section>
+    <main>
+      <div class="eyebrow">Explore the structure</div>
+      <h1>A map you can investigate</h1>
+      <p class="muted" id="summary"></p>
+      <div class="toolbar">
+        <label
+          >Resolution
+          <select id="level" aria-label="Hierarchy level"></select
+        ></label>
+        <button id="back" disabled>← Back</button
+        ><button id="reset">Reset</button>
+        <div class="spacer"></div>
+        <div class="tabs" role="group" aria-label="Visualization">
+          <button data-view="network" aria-pressed="true">Network</button
+          ><button data-view="matrix" aria-pressed="false">Matrix</button
+          ><button data-view="density" aria-pressed="false">Density</button>
+        </div>
+        <button id="save-png">Save image</button
+        ><button id="save-csv">Export view</button>
+      </div>
+      <div class="toolbar">
+        <label
+          >Find group
+          <input
+            id="search"
+            type="search"
+            placeholder="e.g. C12"
+            style="width: 150px" /></label
+        ><label
+          >Min. link weight
+          <input
+            id="threshold"
+            type="number"
+            min="1"
+            value="1"
+            step="1"
+            style="width: 100px" /></label
+        ><label id="matrix-label" hidden
+          >Matrix
+          <select id="matrix-mode">
+            <option value="raw">Edge counts · log</option>
+            <option value="density">Edge density</option>
+            <option value="enrichment">Degree adjusted</option>
+          </select></label
+        ><span id="scope" class="muted"></span>
+      </div>
+      <div class="workspace">
+        <section class="stage" aria-label="Interactive graph visualization">
+          <div class="stage-title">
+            <strong id="view-title">Community network</strong
+            ><span id="view-subtitle"></span>
+          </div>
+          <canvas
+            id="canvas"
+            tabindex="0"
+            role="img"
+            aria-label="Graph overview. Use the group table to select and explore groups with a keyboard."
+          ></canvas>
+          <div class="stage-note" id="caption"></div>
+        </section>
+        <aside aria-live="polite">
+          <div class="eyebrow">Selected group</div>
+          <h2 id="group-title" style="margin-top: 7px">Follow a connection</h2>
+          <div id="detail-copy">
+            Select a group in the map or table. Switch views to examine the same
+            selection.
+          </div>
+          <div class="detail-grid" id="details"></div>
+          <div class="detail-actions">
+            <button id="drill" disabled>Explore children →</button
+            ><button id="members" disabled>List members</button>
+          </div>
+          <div id="status" role="status"></div>
+          <details>
+            <summary>Look up an original node</summary>
+            <p class="muted" style="font-size: 12px">
+              Start the local viewer with
+              <code>largegraph-viz serve RUN</code> to query the on-disk index.
+            </p>
+            <form id="node-form">
+              <label for="node-id" class="sr-only"
+                >Original node identifier</label
+              ><input
+                id="node-id"
+                placeholder="Original node ID"
+                required
+              /><button>Find</button>
+            </form>
+          </details>
+          <pre id="node-results"></pre>
+        </aside>
+      </div>
+      <section class="table-panel">
+        <div class="table-head">
+          <h2>Groups in this view</h2>
+          <span class="muted" id="table-summary"></span
+          ><small>Click a row to link the map and matrix</small>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Nodes</th>
+                <th>Internal edges</th>
+                <th>Boundary edges</th>
+                <th>Fine groups</th>
+                <th><span class="sr-only">Action</span></th>
+              </tr>
+            </thead>
+            <tbody id="group-rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="footer">
+        <div class="help">
+          <strong style="color: var(--text)">Reading this report</strong>
+          <p id="semantics"></p>
+          <details>
+            <summary>Methods and provenance</summary>
+            <p id="methods"></p>
+            <p>
+              Exact summary files and phase manifests accompany this report. The
+              standalone HTML contains bounded aggregate data; original node IDs
+              are queried only by the optional local viewer.
+            </p>
+          </details>
+        </div>
+        <div>
+          <strong style="color: var(--text)">Keep your results</strong>
+          <p>
+            The report works offline. Export the current groups and their exact
+            induced summary links, or use the CLI for the complete quotient in
+            Parquet, CSV or GraphML.
+          </p>
+          <a
+            href="https://github.com/VincenzoImp/largegraph-viz"
+            target="_blank"
+            rel="noopener"
+            >Documentation & source ↗</a
+          >
+        </div>
+      </div>
+    </main>
+    <script id="report-data" type="application/json">
+      {"schema":1,"graph":{"nodes":4039,"edges":88234,"communities":16},"profile":{"components":1,"degree_quantiles":{"0":1.0,"100":1045.0,"25":11.0,"50":25.0,"75":57.0,"90":112.20000000000027,"99":199.6199999999999},"edge_density":0.010819963503439287,"edges":88234,"isolated_nodes":0,"largest_component_fraction":1.0,"largest_component_nodes":4039,"max_degree":1045,"mean_degree":43.69101262688784,"nodes":4039,"statistics":"exact counts; quantiles use NumPy linear interpolation"},"clustering":{"algorithm":"Leiden (leidenalg RBConfigurationVertexPartition)","modularity":0.8357107181826293,"guarantees":"heuristic partition; no connectivity or optimality guarantee"},"hierarchy":{"method":"normalized maximum-spanning-forest single linkage","disconnected_policy":"retain disconnected roots; a requested cap may be exceeded"},"levels":[{"label":"16 groups \u00b7 detected","kind":"detected","nodes":[{"id":0,"label":"C0","size":548,"volume":10757,"internal":5356,"groups":1,"parent":-1,"leaf":0,"artificial":false,"x":-0.2923244052048227,"y":-0.1858137607022157},{"id":1,"label":"C1","size":535,"volume":17861,"internal":8691,"groups":1,"parent":-1,"leaf":1,"artificial":false,"x":-0.32348714701086306,"y":0.14353006194342327},{"id":2,"label":"C2","size":442,"volume":24426,"internal":11591,"groups":1,"parent":-1,"leaf":2,"artificial":false,"x":0.18315660947850637,"y":-0.35328195816409874},{"id":3,"label":"C3","size":403,"volume":12508,"internal":5857,"groups":1,"parent":-1,"leaf":3,"artificial":false,"x":0.27961073568632777,"y":0.1477302481655946},{"id":4,"label":"C4","size":396,"volume":15229,"internal":6922,"groups":1,"parent":-1,"leaf":4,"artificial":false,"x":0.05568630264528302,"y":0.1480332520834411},{"id":5,"label":"C5","size":392,"volume":33449,"internal":16207,"groups":1,"parent":-1,"leaf":5,"artificial":false,"x":-0.014748512809864644,"y":-0.01737750140645129},{"id":6,"label":"C6","size":353,"volume":5762,"internal":2851,"groups":1,"parent":-1,"leaf":6,"artificial":false,"x":0.13641853970382642,"y":-0.10163758005496279},{"id":7,"label":"C7","size":237,"volume":33992,"internal":16543,"groups":1,"parent":-1,"leaf":7,"artificial":false,"x":0.4403296748992452,"y":-0.6063351315942265},{"id":8,"label":"C8","size":226,"volume":11494,"internal":5600,"groups":1,"parent":-1,"leaf":8,"artificial":false,"x":-0.6369284978253776,"y":0.21346226238329016},{"id":9,"label":"C9","size":206,"volume":3973,"internal":1983,"groups":1,"parent":-1,"leaf":9,"artificial":false,"x":-0.7781040641034129,"y":-0.37616999052919},{"id":10,"label":"C10","size":86,"volume":1423,"internal":550,"groups":1,"parent":-1,"leaf":10,"artificial":false,"x":-0.12169066761403055,"y":0.061514095047322935},{"id":11,"label":"C11","size":73,"volume":3221,"internal":1486,"groups":1,"parent":-1,"leaf":11,"artificial":false,"x":0.22385698553297795,"y":-0.7540362655479518},{"id":12,"label":"C12","size":60,"volume":414,"internal":205,"groups":1,"parent":-1,"leaf":12,"artificial":false,"x":0.9617384281176934,"y":0.27396933383447925},{"id":13,"label":"C13","size":38,"volume":1114,"internal":520,"groups":1,"parent":-1,"leaf":13,"artificial":false,"x":-0.011041211638623238,"y":0.4019448731291861},{"id":14,"label":"C14","size":25,"volume":547,"internal":260,"groups":1,"parent":-1,"leaf":14,"artificial":false,"x":0.6107777440864273,"y":0.5102346093895084},{"id":15,"label":"C15","size":19,"volume":298,"internal":136,"groups":1,"parent":-1,"leaf":15,"artificial":false,"x":-0.7132505139432929,"y":0.4942334520228509}],"matrix":"7BQAAAAAAAAAAAAABgAAAAEAAAADAAAAAAAAAAAAAAAAAAAABgAAAB0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADzIQAAAgAAAAAAAAANAAAAXAAAAAsAAAAAAAAAJAEAAAEAAAAnAAAAAAAAAAAAAAAEAAAAAAAAABkAAAAAAAAAAAAAAEctAAADAAAABAAAADcAAAAXAAAAiQMAAAAAAAAAAAAABAAAAPgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4RYAAEkCAACTAAAACwAAAAAAAAAAAAAAAAAAAAUAAAAAAAAABAAAAAYAAAAbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKGwAAXwIAAAcAAAAAAAAAAAAAAAAAAAByAAAAAAAAAAAAAAA2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE8/AAAGAAAAAAAAAAEAAAAAAAAAegAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwsAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACfQAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOAVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvwcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmAgAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM4FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiAAAAA==","dtype":"u32","edges":[[2,7,905],[4,5,607],[3,4,585],[1,8,292],[2,11,248],[3,5,147],[5,10,122],[4,10,114],[1,5,92],[2,5,55],[4,13,54],[1,10,39],[0,10,29],[3,14,27],[1,15,25],[2,6,23],[1,4,13],[1,6,11],[3,6,11],[10,13,8],[4,6,7],[0,3,6],[0,9,6],[3,13,6],[5,6,6],[3,10,5],[1,13,4],[2,4,4],[2,10,4],[3,12,4],[0,5,3],[2,3,3],[1,2,2],[5,13,2],[6,10,2],[0,4,1],[1,9,1],[5,8,1],[7,11,1],[8,15,1]],"edge_cap":1200,"filtering":{"display_edge_pairs":40,"all_external_display_pairs":40,"shown_external_edge_weight":3476,"omitted_external_edge_weight":0,"policy":"largest raw edge weights; filtering affects the image only"},"layout":"igraph-Fruchterman-Reingold-seeded-worker","artificial_other":false}],"semantics":"All canonical edges contribute to counts. Communities and hierarchy are heuristic. Distances depend on the layout. Display filtering only affects drawn links. A matrix diagonal counts each internal undirected edge twice."}
+    </script>
+    <script>
+      "use strict";
+      const DATA = JSON.parse(
+        document.getElementById("report-data").textContent,
+      );
+      const $ = (id) => document.getElementById(id),
+        fmt = (n) => new Intl.NumberFormat("en").format(n);
+      const INITIAL_LEVEL = DATA.levels.length - 1;
+      const state = {
+        level: INITIAL_LEVEL,
+        scope: null,
+        selected: null,
+        view: "network",
+        search: "",
+        threshold: 1,
+        history: [],
+        hover: null,
+        zoom: 1,
+        panX: 0,
+        panY: 0,
+      };
+      const canvas = $("canvas"),
+        ctx = canvas.getContext("2d");
+      let positions = [],
+        visible = [],
+        matrixRect = null;
+      function text(el, value) {
+        el.textContent = value;
+        return el;
+      }
+      function color(node) {
+        return node.artificial
+          ? "#939eac"
+          : `hsl(${(node.id * 137.508 + 35) % 360},65%,67%)`;
+      }
+      function current() {
+        return DATA.levels[state.level];
+      }
+      function weights(level) {
+        if (!level.decoded) {
+          const bytes = Uint8Array.from(atob(level.matrix), (c) =>
+            c.charCodeAt(0),
+          );
+          const view = new DataView(bytes.buffer);
+          level.decoded = Array.from(
+            { length: level.nodes.length ** 2 },
+            (_, i) =>
+              level.dtype === "u32"
+                ? view.getUint32(i * 4, true)
+                : view.getFloat64(i * 8, true),
+          );
+        }
+        return level.decoded;
+      }
+      function weight(a, b) {
+        const n = current().nodes.length;
+        return weights(current())[Math.min(a, b) * n + Math.max(a, b)];
+      }
+      function activeNodes() {
+        return current().nodes.filter(
+          (n) =>
+            (state.scope === null || n.parent === state.scope) &&
+            n.label.toLowerCase().includes(state.search),
+        );
+      }
+      function download(name, content, type) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([content], { type }));
+        a.download = name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      function metric(value, label) {
+        const div = document.createElement("div");
+        div.className = "metric";
+        div.append(
+          text(document.createElement("strong"), value),
+          text(document.createElement("span"), label),
+        );
+        return div;
+      }
+      $("metrics").append(
+        metric(fmt(DATA.graph.nodes), "Original nodes"),
+        metric(fmt(DATA.graph.edges), "Unique undirected edges"),
+        metric(fmt(DATA.graph.communities), "Detected communities"),
+        metric(fmt(DATA.profile.components), "Connected components"),
+      );
+      text(
+        $("summary"),
+        `${(100 * DATA.profile.largest_component_fraction).toFixed(1)}% of nodes in the largest component · mean degree ${DATA.profile.mean_degree.toFixed(1)} · modularity ${DATA.clustering.modularity.toFixed(4)}`,
+      );
+      text($("semantics"), DATA.semantics);
+      text(
+        $("methods"),
+        `${DATA.clustering.algorithm}. ${DATA.clustering.guarantees}. Hierarchy: ${DATA.hierarchy.method}. ${DATA.hierarchy.disconnected_policy}.`,
+      );
+      DATA.levels.forEach((level, i) => {
+        const option = text(document.createElement("option"), level.label);
+        option.value = i;
+        $("level").append(option);
+      });
+      function select(id) {
+        state.selected = id;
+        details();
+        render();
+        table();
+      }
+      function details() {
+        const node = current().nodes[state.selected];
+        $("details").replaceChildren();
+        $("status").textContent = "";
+        $("drill").disabled = true;
+        $("members").disabled = true;
+        if (!node) {
+          text($("group-title"), "Follow a connection");
+          text(
+            $("detail-copy"),
+            "Select a group in the map or table. Switch views to examine the same selection.",
+          );
+          return;
+        }
+        text($("group-title"), node.label);
+        text(
+          $("detail-copy"),
+          node.artificial
+            ? "Artificial display collection: these groups were not detected as a single community."
+            : `${fmt(node.groups)} detected group${node.groups === 1 ? "" : "s"} represented. Area shows node count; layout distances have no metric interpretation.`,
+        );
+        for (const [value, label] of [
+          [node.size, "Nodes"],
+          [node.internal, "Internal edges"],
+          [node.volume - 2 * node.internal, "Boundary edges"],
+          [node.volume, "Degree volume"],
+        ]) {
+          const div = document.createElement("div");
+          div.append(
+            text(document.createElement("strong"), fmt(value)),
+            text(document.createElement("small"), label),
+          );
+          $("details").append(div);
+        }
+        $("drill").disabled = !(
+          state.level + 1 < DATA.levels.length &&
+          DATA.levels[state.level + 1].nodes.some((n) => n.parent === node.id)
+        );
+        $("members").disabled = node.leaf === null;
+      }
+      function table() {
+        const rows = $("group-rows");
+        rows.replaceChildren();
+        const nodes = activeNodes().sort(
+          (a, b) => b.size - a.size || a.id - b.id,
+        );
+        text(
+          $("table-summary"),
+          `${fmt(nodes.length)} visible · ${fmt(nodes.reduce((s, n) => s + n.size, 0))} nodes`,
+        );
+        for (const node of nodes) {
+          const tr = document.createElement("tr");
+          tr.dataset.id = node.id;
+          tr.className = state.selected === node.id ? "selected" : "";
+          const first = document.createElement("td"),
+            dot = document.createElement("span");
+          dot.className = "dot";
+          dot.style.background = color(node);
+          first.append(dot, document.createTextNode(node.label));
+          tr.append(first);
+          for (const value of [
+            node.size,
+            node.internal,
+            node.volume - 2 * node.internal,
+            node.groups,
+          ])
+            tr.append(text(document.createElement("td"), fmt(value)));
+          const action = document.createElement("td"),
+            button = text(document.createElement("button"), "Select");
+          button.setAttribute("aria-label", `Select ${node.label}`);
+          button.onclick = (event) => {
+            event.stopPropagation();
+            select(node.id);
+          };
+          action.append(button);
+          tr.append(action);
+          tr.onclick = () => select(node.id);
+          rows.append(tr);
+        }
+      }
+      function resize() {
+        const rect = canvas.getBoundingClientRect(),
+          dpr = Math.min(2, window.devicePixelRatio || 1);
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        render();
+      }
+      function viewport() {
+        const rect = canvas.getBoundingClientRect();
+        return [rect.width, rect.height];
+      }
+      function render() {
+        const [width, height] = viewport();
+        ctx.clearRect(0, 0, width, height);
+        visible = activeNodes();
+        positions = [];
+        matrixRect = null;
+        const mass = visible.reduce((s, n) => s + n.size, 0);
+        text(
+          $("scope"),
+          state.scope === null
+            ? "Overview"
+            : `Inside ${DATA.levels[state.level - 1].nodes[state.scope].label}`,
+        );
+        text(
+          $("view-subtitle"),
+          `${fmt(visible.length)} visible groups · ${fmt(mass)} represented nodes`,
+        );
+        if (!visible.length) {
+          ctx.fillStyle = "#a1b0c0";
+          ctx.font = "15px system-ui";
+          ctx.fillText(
+            "No matching groups. Clear the search or reset the view.",
+            30,
+            100,
+          );
+          return;
+        }
+        // Keep only the strongest bounded set *within this view*. A drilldown
+        // must not inherit a global filter that hid all of its local links.
+        const cap =
+          current().edge_cap ?? current().filtering.display_edge_pairs;
+        const candidates = [];
+        const weaker = (a, b) =>
+          a[2] < b[2] ||
+          (a[2] === b[2] && (a[0] > b[0] || (a[0] === b[0] && a[1] > b[1])));
+        function offer(edge) {
+          if (!cap) return;
+          if (candidates.length < cap) {
+            candidates.push(edge);
+            let i = candidates.length - 1;
+            while (i > 0) {
+              const parent = (i - 1) >> 1;
+              if (!weaker(candidates[i], candidates[parent])) break;
+              [candidates[i], candidates[parent]] = [
+                candidates[parent],
+                candidates[i],
+              ];
+              i = parent;
+            }
+          } else if (weaker(candidates[0], edge)) {
+            candidates[0] = edge;
+            let i = 0;
+            while (true) {
+              let child = 2 * i + 1;
+              if (child >= candidates.length) break;
+              if (
+                child + 1 < candidates.length &&
+                weaker(candidates[child + 1], candidates[child])
+              )
+                child++;
+              if (!weaker(candidates[child], candidates[i])) break;
+              [candidates[child], candidates[i]] = [
+                candidates[i],
+                candidates[child],
+              ];
+              i = child;
+            }
+          }
+        }
+        let allExternal = 0,
+          allPairs = 0;
+        for (let i = 0; i < visible.length; i++)
+          for (let j = i + 1; j < visible.length; j++) {
+            const a = visible[i].id,
+              b = visible[j].id,
+              w = weight(a, b);
+            if (w) {
+              allExternal += w;
+              allPairs++;
+              if (w >= state.threshold) offer([a, b, w]);
+            }
+          }
+        candidates.sort((a, b) => b[2] - a[2] || a[0] - b[0] || a[1] - b[1]);
+        const shown = candidates.reduce((s, e) => s + e[2], 0);
+        let crossBoundary =
+          visible.reduce((s, n) => s + n.volume - 2 * n.internal, 0) -
+          2 * allExternal;
+        if (state.view === "matrix") {
+          drawMatrix(width, height);
+          text(
+            $("caption"),
+            "All links in the visible induced summary are included in the matrix. Diagonal entries count internal edges twice. Filtering groups hides their rows and columns. Degree adjustment uses full-graph degree volumes.",
+          );
+        } else {
+          drawNetwork(width, height, candidates, state.view === "density");
+          text(
+            $("caption"),
+            state.view === "density"
+              ? "Fixed-kernel smoothing of population at aggregate positions; colors use a view-normalized log scale. Exact counts are in the table/export. Camera boundaries can clip the field. Scroll to zoom · drag to pan · double-click to fit."
+              : `${fmt(candidates.length)} of ${fmt(allPairs)} visible group pairs drawn · ${fmt(allExternal - shown)} external edge weight omitted from lines · ${fmt(crossBoundary)} edges cross this view’s boundary. Area scales with population above a 0.4 px minimum radius. Scroll to zoom · drag to pan · double-click to fit.`,
+          );
+        }
+      }
+      function drawNetwork(width, height, edges, density) {
+        text(
+          $("view-title"),
+          density ? "Node mass at aggregate positions" : "Community network",
+        );
+        const xs = visible.map((n) => n.x),
+          ys = visible.map((n) => n.y),
+          minX = Math.min(...xs),
+          maxX = Math.max(...xs),
+          minY = Math.min(...ys),
+          maxY = Math.max(...ys);
+        const spanX = Math.max(0.00001, maxX - minX),
+          spanY = Math.max(0.00001, maxY - minY),
+          scale = Math.min((width - 100) / spanX, (height - 150) / spanY);
+        const maxSize = Math.max(...current().nodes.map((n) => n.size));
+        positions = visible.map((n) => ({
+          node: n,
+          x:
+            width / 2 +
+            (n.x - (minX + maxX) / 2) * scale * state.zoom +
+            state.panX,
+          y:
+            height / 2 +
+            20 -
+            (n.y - (minY + maxY) / 2) * scale * state.zoom +
+            state.panY,
+          r: Math.max(
+            0.4,
+            Math.sqrt(n.size / maxSize) *
+              Math.min(
+                27,
+                Math.max(5, 160 / Math.sqrt(current().nodes.length)),
+              ),
+          ),
+        }));
+        const byId = new Map(positions.map((p) => [p.node.id, p]));
+        if (density) {
+          // Linear accumulation of population with one fixed normalized kernel.
+          // Display colors use log1p; raw node counts remain in the table/export.
+          const side = 256,
+            radius = 9,
+            sigma = 3,
+            field = new Float64Array(side * side),
+            kernel = [];
+          let norm = 0;
+          for (let i = -radius; i <= radius; i++) {
+            const value = Math.exp((-i * i) / (2 * sigma * sigma));
+            kernel.push(value);
+            norm += value;
+          }
+          for (let i = 0; i < kernel.length; i++) kernel[i] /= norm;
+          for (const p of positions) {
+            const x = Math.round((p.x / width) * (side - 1)),
+              y = Math.round((p.y / height) * (side - 1));
+            for (let dy = -radius; dy <= radius; dy++) {
+              const yy = y + dy;
+              if (yy < 0 || yy >= side) continue;
+              for (let dx = -radius; dx <= radius; dx++) {
+                const xx = x + dx;
+                if (xx < 0 || xx >= side) continue;
+                field[yy * side + xx] +=
+                  p.node.size * kernel[dx + radius] * kernel[dy + radius];
+              }
+            }
+          }
+          let maximum = 0;
+          for (const value of field) maximum = Math.max(maximum, value);
+          const image = new ImageData(side, side),
+            stops = [
+              [16, 22, 30],
+              [39, 49, 91],
+              [125, 49, 116],
+              [230, 104, 98],
+              [252, 231, 153],
+            ];
+          for (let i = 0; i < field.length; i++) {
+            const t = maximum
+                ? (Math.log1p(field[i]) / Math.log1p(maximum)) * 4
+                : 0,
+              index = Math.min(3, Math.floor(t)),
+              fraction = t - index;
+            for (let c = 0; c < 3; c++)
+              image.data[4 * i + c] =
+                stops[index][c] * (1 - fraction) +
+                stops[index + 1][c] * fraction;
+            image.data[4 * i + 3] = 255;
+          }
+          const buffer = document.createElement("canvas");
+          buffer.width = side;
+          buffer.height = side;
+          buffer.getContext("2d").putImageData(image, 0, 0);
+          ctx.drawImage(buffer, 0, 0, width, height);
+        } else {
+          const maxWeight = Math.max(1, ...edges.map((e) => e[2]));
+          for (const [a, b, w] of edges) {
+            const left = byId.get(a),
+              right = byId.get(b),
+              selected = state.selected === a || state.selected === b;
+            ctx.beginPath();
+            ctx.moveTo(left.x, left.y);
+            ctx.lineTo(right.x, right.y);
+            ctx.strokeStyle = selected
+              ? "rgba(116,229,194,.8)"
+              : "rgba(130,164,185,.2)";
+            ctx.lineWidth = selected
+              ? 2
+              : 0.3 + (2 * Math.log1p(w)) / Math.log1p(maxWeight);
+            ctx.stroke();
+          }
+        }
+        for (const p of positions) {
+          if (!density || p.node.id === state.selected) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = color(p.node);
+            ctx.fill();
+            ctx.strokeStyle =
+              p.node.id === state.selected ? "#ffffff" : "#c3d4df";
+            ctx.lineWidth = p.node.id === state.selected ? 2.5 : 0.4;
+            ctx.stroke();
+          }
+          if (visible.length <= 24 || p.node.id === state.selected) {
+            ctx.fillStyle = "#eef3f7";
+            ctx.font = "11px system-ui";
+            ctx.fillText(p.node.label, p.x + p.r + 5, p.y + 4);
+          }
+        }
+      }
+      function drawMatrix(width, height) {
+        text($("view-title"), "Connectivity beyond the layout");
+        const count = visible.length,
+          size = Math.max(1, Math.min(width - 110, height - 120)),
+          left = (width - size) / 2,
+          top = 80,
+          cell = size / count;
+        matrixRect = { left, top, size, cell };
+        const mode = $("matrix-mode").value,
+          total = 2 * DATA.graph.edges;
+        let max = 0;
+        const values = [];
+        for (let i = 0; i < count; i++) {
+          values[i] = [];
+          for (let j = 0; j < count; j++) {
+            const a = visible[i],
+              b = visible[j],
+              raw = weight(a.id, b.id) * (a.id === b.id ? 2 : 1);
+            let value = Math.log1p(raw);
+            if (mode === "density") {
+              const possible =
+                a.id === b.id ? a.size * (a.size - 1) : a.size * b.size;
+              value = possible ? raw / possible : 0;
+            }
+            if (mode === "enrichment")
+              value = Math.log2(
+                (raw + 1) / (total ? (a.volume * b.volume) / total + 1 : 1),
+              );
+            values[i][j] = value;
+            max = Math.max(max, Math.abs(value));
+          }
+        }
+        for (let i = 0; i < count; i++)
+          for (let j = 0; j < count; j++) {
+            const t = max ? values[i][j] / max : 0;
+            ctx.fillStyle =
+              mode === "enrichment"
+                ? `hsl(${t >= 0 ? 17 : 209},${Math.abs(t) * 65}%,${12 + Math.abs(t) * 55}%)`
+                : `hsl(${190 - t * 145},${20 + t * 60}%,${8 + t * 60}%)`;
+            ctx.fillRect(
+              left + j * cell,
+              top + i * cell,
+              Math.ceil(cell),
+              Math.ceil(cell),
+            );
+          }
+        if (state.selected !== null) {
+          const i = visible.findIndex((n) => n.id === state.selected);
+          if (i >= 0) {
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(left, top + i * cell, size, cell);
+            ctx.strokeRect(left + i * cell, top, cell, size);
+          }
+        }
+        ctx.fillStyle = "#a1b0c0";
+        ctx.font = "11px system-ui";
+        ctx.fillText(
+          mode === "enrichment"
+            ? "Blue: below degree-volume expectation · orange: above"
+            : "Dark: low connectivity · bright: high connectivity",
+          left,
+          top + size + 22,
+        );
+      }
+      let cameraScope = null;
+      function update() {
+        const key = `${state.level}:${state.scope}`;
+        if (cameraScope !== key) {
+          state.zoom = 1;
+          state.panX = 0;
+          state.panY = 0;
+          cameraScope = key;
+        }
+        $("level").value = state.level;
+        $("back").disabled = !state.history.length;
+        for (const button of document.querySelectorAll("[data-view]"))
+          button.setAttribute(
+            "aria-pressed",
+            button.dataset.view === state.view,
+          );
+        $("matrix-label").hidden = state.view !== "matrix";
+        $("threshold").disabled = state.view !== "network";
+        details();
+        table();
+        render();
+      }
+      function nodeAt(event) {
+        const rect = canvas.getBoundingClientRect(),
+          x = event.clientX - rect.left,
+          y = event.clientY - rect.top;
+        if (matrixRect) {
+          const m = matrixRect;
+          if (
+            x >= m.left &&
+            x < m.left + m.size &&
+            y >= m.top &&
+            y < m.top + m.size
+          ) {
+            const a = visible[Math.floor((y - m.top) / m.cell)],
+              b = visible[Math.floor((x - m.left) / m.cell)];
+            canvas.title = `${a.label} ↔ ${b.label}: ${fmt(weight(a.id, b.id))} undirected edges${a.id === b.id ? " (matrix diagonal doubles this)" : ""}`;
+            return a.id;
+          }
+          return null;
+        }
+        let best = null,
+          distance = Infinity;
+        for (const p of positions) {
+          const d = Math.hypot(p.x - x, p.y - y);
+          if (d < Math.max(8, p.r) && d < distance) {
+            best = p.node.id;
+            distance = d;
+          }
+        }
+        canvas.title =
+          best === null
+            ? ""
+            : `${current().nodes[best].label} · ${fmt(current().nodes[best].size)} nodes`;
+        return best;
+      }
+      let drag = null,
+        dragged = false;
+      canvas.onpointerdown = (event) => {
+        if (state.view === "matrix") return;
+        drag = {
+          x: event.clientX,
+          y: event.clientY,
+          panX: state.panX,
+          panY: state.panY,
+        };
+        dragged = false;
+        canvas.setPointerCapture(event.pointerId);
+      };
+      canvas.onpointermove = (event) => {
+        if (!drag) return;
+        const dx = event.clientX - drag.x,
+          dy = event.clientY - drag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 4) dragged = true;
+        if (dragged) {
+          state.panX = drag.panX + dx;
+          state.panY = drag.panY + dy;
+          render();
+        }
+      };
+      canvas.onpointerup = () => {
+        drag = null;
+      };
+      canvas.onpointercancel = () => {
+        drag = null;
+      };
+      canvas.addEventListener(
+        "wheel",
+        (event) => {
+          if (state.view === "matrix") return;
+          event.preventDefault();
+          const rect = canvas.getBoundingClientRect(),
+            [width, height] = viewport(),
+            before = state.zoom;
+          state.zoom = Math.max(
+            0.25,
+            Math.min(40, before * Math.exp(-event.deltaY * 0.0015)),
+          );
+          const factor = state.zoom / before,
+            x = event.clientX - rect.left - width / 2,
+            y = event.clientY - rect.top - height / 2 - 20;
+          state.panX = x - (x - state.panX) * factor;
+          state.panY = y - (y - state.panY) * factor;
+          render();
+        },
+        { passive: false },
+      );
+      canvas.ondblclick = () => {
+        state.zoom = 1;
+        state.panX = 0;
+        state.panY = 0;
+        render();
+      };
+      canvas.onkeydown = (event) => {
+        if (state.view === "matrix") return;
+        if (event.key === "+" || event.key === "=")
+          state.zoom = Math.min(40, state.zoom * 1.25);
+        else if (event.key === "-")
+          state.zoom = Math.max(0.25, state.zoom / 1.25);
+        else if (event.key === "ArrowLeft") state.panX -= 30;
+        else if (event.key === "ArrowRight") state.panX += 30;
+        else if (event.key === "ArrowUp") state.panY -= 30;
+        else if (event.key === "ArrowDown") state.panY += 30;
+        else return;
+        event.preventDefault();
+        render();
+      };
+      canvas.onclick = (event) => {
+        if (dragged) {
+          dragged = false;
+          return;
+        }
+        const id = nodeAt(event);
+        if (id !== null) select(id);
+      };
+      canvas.onmousemove = (event) => nodeAt(event);
+      $("level").onchange = () => {
+        state.level = Number($("level").value);
+        state.scope = null;
+        state.selected = null;
+        state.history = [];
+        update();
+      };
+      $("back").onclick = () => {
+        const previous = state.history.pop();
+        Object.assign(state, previous);
+        update();
+      };
+      $("reset").onclick = () => {
+        Object.assign(state, {
+          level: INITIAL_LEVEL,
+          scope: null,
+          selected: null,
+          search: "",
+          history: [],
+          zoom: 1,
+          panX: 0,
+          panY: 0,
+        });
+        $("search").value = "";
+        update();
+      };
+      $("drill").onclick = () => {
+        state.history.push({
+          level: state.level,
+          scope: state.scope,
+          selected: state.selected,
+        });
+        state.scope = state.selected;
+        state.level++;
+        state.selected = null;
+        state.search = "";
+        $("search").value = "";
+        update();
+      };
+      $("search").oninput = () => {
+        state.search = $("search").value.toLowerCase();
+        table();
+        render();
+      };
+      $("threshold").oninput = () => {
+        state.threshold = Math.max(1, Number($("threshold").value) || 1);
+        render();
+      };
+      $("matrix-mode").onchange = render;
+      document.querySelectorAll("[data-view]").forEach(
+        (button) =>
+          (button.onclick = () => {
+            state.view = button.dataset.view;
+            update();
+          }),
+      );
+      $("save-png").onclick = () => {
+        const a = document.createElement("a");
+        a.download = `largegraph-${state.view}.png`;
+        const image = document.createElement("canvas");
+        image.width = canvas.width;
+        image.height = canvas.height;
+        const context = image.getContext("2d");
+        context.fillStyle = "#10161e";
+        context.fillRect(0, 0, image.width, image.height);
+        context.drawImage(canvas, 0, 0);
+        a.href = image.toDataURL("image/png");
+        a.click();
+      };
+      function zipFiles(entries) {
+        // ZIP STORE: a small interoperable archive without a JS dependency.
+        const encoder = new TextEncoder(),
+          parts = [],
+          central = [];
+        let offset = 0,
+          centralSize = 0;
+        const crcTable = Uint32Array.from({ length: 256 }, (_, i) => {
+          let value = i;
+          for (let k = 0; k < 8; k++)
+            value = (value >>> 1) ^ (value & 1 ? 0xedb88320 : 0);
+          return value >>> 0;
+        });
+        for (const [name, content] of entries) {
+          const filename = encoder.encode(name),
+            bytes = encoder.encode(content);
+          let crc = 0xffffffff;
+          for (const byte of bytes)
+            crc = crcTable[(crc ^ byte) & 255] ^ (crc >>> 8);
+          crc = (crc ^ 0xffffffff) >>> 0;
+          const local = new Uint8Array(30),
+            l = new DataView(local.buffer);
+          l.setUint32(0, 0x04034b50, true);
+          l.setUint16(4, 20, true);
+          l.setUint16(12, 33, true); // 1980-01-01: a valid deterministic DOS date.
+          l.setUint32(14, crc, true);
+          l.setUint32(18, bytes.length, true);
+          l.setUint32(22, bytes.length, true);
+          l.setUint16(26, filename.length, true);
+          const header = new Uint8Array(46),
+            c = new DataView(header.buffer);
+          c.setUint32(0, 0x02014b50, true);
+          c.setUint16(4, 20, true);
+          c.setUint16(6, 20, true);
+          c.setUint16(14, 33, true);
+          c.setUint32(16, crc, true);
+          c.setUint32(20, bytes.length, true);
+          c.setUint32(24, bytes.length, true);
+          c.setUint16(28, filename.length, true);
+          c.setUint32(42, offset, true);
+          parts.push(local, filename, bytes);
+          central.push(header, filename);
+          offset += local.length + filename.length + bytes.length;
+          centralSize += header.length + filename.length;
+        }
+        const end = new Uint8Array(22),
+          e = new DataView(end.buffer);
+        e.setUint32(0, 0x06054b50, true);
+        e.setUint16(8, entries.length, true);
+        e.setUint16(10, entries.length, true);
+        e.setUint32(12, centralSize, true);
+        e.setUint32(16, offset, true);
+        return new Blob([...parts, ...central, end], {
+          type: "application/zip",
+        });
+      }
+      $("save-csv").onclick = () => {
+        const nodes = activeNodes(),
+          cell = (value) => `"${String(value).replaceAll('"', '""')}"`,
+          rows = ["source,target,weight"];
+        for (let i = 0; i < nodes.length; i++)
+          for (let j = i; j < nodes.length; j++) {
+            const w = weight(nodes[i].id, nodes[j].id);
+            if (w)
+              rows.push(`${cell(nodes[i].label)},${cell(nodes[j].label)},${w}`);
+          }
+        const values = [
+          "group,node_count,degree_volume,internal_edges,artificial",
+          ...nodes.map(
+            (n) =>
+              `${cell(n.label)},${n.size},${n.volume},${n.internal},${n.artificial}`,
+          ),
+        ];
+        const archive = zipFiles([
+          ["nodes.csv", values.join("\n") + "\n"],
+          ["edges.csv", rows.join("\n") + "\n"],
+          [
+            "README.txt",
+            "Exact induced aggregate counts for the visible groups. Line filtering does not remove exported pairs. Internal undirected edges are stored once as diagonal weights. Artificial display collections are flagged. Original graph: " +
+              DATA.graph.nodes +
+              " nodes, " +
+              DATA.graph.edges +
+              " edges.\n",
+          ],
+        ]);
+        download("summary.zip", archive, "application/zip");
+      };
+      async function query(path) {
+        if (location.protocol === "file:") {
+          text(
+            $("status"),
+            "Open this report through largegraph-viz serve RUN to use the disk index.",
+          );
+          return null;
+        }
+        try {
+          const response = await fetch(path);
+          const result = await response.json();
+          if (!response.ok) throw Error(result.error || response.statusText);
+          return result;
+        } catch (error) {
+          text($("status"), error.message);
+          return null;
+        }
+      }
+      $("members").onclick = async () => {
+        const node = current().nodes[state.selected];
+        const result = await query(
+          `/api/members?community=${node.leaf}&limit=50`,
+        );
+        if (result)
+          text(
+            $("node-results"),
+            result.members.map((n) => n.original_id).join("\n") +
+              (result.has_more
+                ? "\n… More available through the CLI/API."
+                : ""),
+          );
+      };
+      $("node-form").onsubmit = async (event) => {
+        event.preventDefault();
+        const result = await query(
+          `/api/neighbors?node=${encodeURIComponent($("node-id").value)}&limit=50`,
+        );
+        if (result)
+          text(
+            $("node-results"),
+            `${result.node.original_id} · C${result.node.community}\nDegree: ${fmt(result.degree)}\n\n${result.neighbors.map((n) => n.original_id).join("\n")}${result.truncated ? "\n… First 50 shown." : ""}`,
+          );
+      };
+      new ResizeObserver(resize).observe(canvas);
+      update();
+      window.largegraph = { data: DATA, state, select, update };
+    </script>
+  </body>
+</html>

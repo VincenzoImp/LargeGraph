@@ -16,6 +16,7 @@ own license files and notices. The project wheel does not vendor their code.
 | python-igraph / igraph | [GPL](https://github.com/igraph/python-igraph) |
 | Matplotlib (optional) | [Matplotlib license and bundled notices](https://matplotlib.org/stable/project/license.html) |
 | SciPy (optional) | [BSD and bundled notices](https://github.com/scipy/scipy/blob/main/LICENSE.txt) |
+| NetworKit (optional) | [MIT and upstream notices](https://github.com/networkit/networkit/blob/master/License.txt) |
 | leidenalg (optional) | [GPL-3.0-or-later](https://github.com/vtraag/leidenalg/blob/main/LICENSE) |
 | scikit-learn (optional) | [BSD-3-Clause](https://github.com/scikit-learn/scikit-learn/blob/main/COPYING) |
 | CluStRE (external, optional) | [Upstream source and license](https://github.com/KaHIP/CluStRE) |
