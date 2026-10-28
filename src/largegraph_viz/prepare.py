@@ -25,17 +25,21 @@ from .runtime import (
 )
 
 LOG = logging.getLogger(__name__)
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 def batches(path: Path, batch_rows: int = 250_000, columns=None):
     yield from pq.ParquetFile(path).iter_batches(batch_size=batch_rows, columns=columns)
 
 
-def query_batches(connection, batch_rows):
-    if hasattr(connection, "to_arrow_reader"):
-        return connection.to_arrow_reader(batch_rows)
-    return connection.fetch_record_batch(batch_rows)
+def query_batches(connection, query: str, batch_rows: int):
+    """Stream the relational query; DB-API Arrow export can reorder/materialize rows.
+
+    DuckDB 2 re-feeds execute() results through Arrow, which both loses sorted
+    CSR order with preserve_insertion_order=false and copies the full result.
+    The SQL relation streams ordered batches in both supported major versions.
+    """
+    return connection.sql(query).to_arrow_reader(batch_rows)
 
 
 def copy_query(con, query: str, path: Path, csv: bool = False):
@@ -112,12 +116,12 @@ def prepare_graph(
                     )
                     invalid = con.execute(
                         "SELECT count(*) FROM raw WHERE s IS NULL OR t IS NULL OR s='' OR t=''"
-                    ).fetchone()[0]
+                    ).fetchall()[0][0]
                     if invalid:
                         raise ValueError(f"Input contains {invalid} missing/empty endpoints")
                     raw_rows, loops = con.execute(
                         "SELECT count(*), count(*) FILTER (WHERE s=t) FROM raw"
-                    ).fetchone()
+                    ).fetchall()[0]
                     steps.commit("ingest", {"rows": int(raw_rows), "loops": int(loops)})
                 if not steps.done("identifiers"):
                     node_union = "SELECT s AS original_id FROM raw UNION SELECT t FROM raw"
@@ -126,14 +130,14 @@ def prepare_graph(
                         node_id = identifier(node_column)
                         invalid = con.execute(
                             f"SELECT count(*) FROM {relation} WHERE {node_id} IS NULL OR CAST({node_id} AS VARCHAR)=''"
-                        ).fetchone()[0]
+                        ).fetchall()[0][0]
                         if invalid:
                             raise ValueError("Node file contains missing/empty identifiers")
                         node_union += f" UNION SELECT CAST({node_id} AS VARCHAR) FROM {relation}"
                     con.execute(
                         f"CREATE OR REPLACE TABLE ids AS SELECT original_id, (row_number() OVER (ORDER BY original_id)-1)::UINTEGER AS node_id FROM ({node_union})"
                     )
-                    n = int(con.execute("SELECT count(*) FROM ids").fetchone()[0])
+                    n = int(con.execute("SELECT count(*) FROM ids").fetchall()[0][0])
                     if not 0 < n < 2**32:
                         raise ValueError("Graph must have between 1 and 2^32-1 nodes")
                     copy_query(
@@ -177,13 +181,11 @@ def prepare_graph(
                     offsets = np.load(out / "offsets.npy")
                 if not steps.done("adjacency"):
                     edges = f"read_parquet({literal(out / 'edges.parquet')})"
-                    reader = query_batches(
-                        con.execute(
-                            f"SELECT target FROM (SELECT source,target FROM {edges} UNION ALL SELECT target AS source,source AS target FROM {edges}) ORDER BY source,target"
-                        ),
-                        resources.batch_rows,
-                    )
-                    with (out / "neighbors.u32").open("wb") as stream:
+                    query = f"SELECT target FROM (SELECT source,target FROM {edges} UNION ALL SELECT target AS source,source AS target FROM {edges}) ORDER BY source,target"
+                    with (
+                        query_batches(con, query, resources.batch_rows) as reader,
+                        (out / "neighbors.u32").open("wb") as stream,
+                    ):
                         for batch in reader:
                             batch.column(0).to_numpy().astype("<u4", copy=False).tofile(stream)
                     steps.commit("adjacency")

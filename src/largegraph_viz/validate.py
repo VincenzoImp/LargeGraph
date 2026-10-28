@@ -46,7 +46,7 @@ def align_truth(
         cnode, clabel = identifier(node_column), identifier(label_column)
         duplicates = con.execute(
             f"SELECT count(*)-count(DISTINCT {cnode}), count(*) FILTER (WHERE {cnode} IS NULL OR {clabel} IS NULL) FROM {truth_query}"
-        ).fetchone()
+        ).fetchall()[0]
         if duplicates[0] or duplicates[1]:
             raise ValueError(
                 "Truth CSV must have unique non-null node identifiers and non-null labels"
@@ -56,12 +56,7 @@ def align_truth(
             f"LEFT JOIN {truth_query} t ON n.original_id=t.{cnode} ORDER BY n.node_id"
         )
         # Only O(nodes), never O(edges).
-        result = con.execute(query)
-        table = (
-            result.to_arrow_table()
-            if hasattr(result, "to_arrow_table")
-            else result.fetch_arrow_table()
-        )
+        table = con.sql(query).to_arrow_table()
         if table["truth"].null_count:
             raise ValueError("Truth CSV is missing prepared graph nodes")
         return np.asarray(table["truth"].to_pylist())

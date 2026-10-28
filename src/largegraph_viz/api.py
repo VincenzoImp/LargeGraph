@@ -109,7 +109,7 @@ def analyze(
             key: str(value.resolve()) if isinstance(value, Path) else value
             for key, value in dataclasses.asdict(options).items()
         },
-        "version": 1,
+        "version": 2,
     }
     job_id = signature(config)
     output.mkdir(parents=True, exist_ok=True)

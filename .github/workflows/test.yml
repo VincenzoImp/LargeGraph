@@ -37,6 +37,20 @@ jobs:
         with:
           name: demo-${{ matrix.os }}-${{ matrix.python }}
           path: runs/ci-demo/report
+  legacy-data-engine:
+    name: DuckDB 1.5 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --locked --extra images --extra leiden --extra validation
+      - name: Exercise the previously released data-engine versions
+        run: uv pip install 'duckdb==1.5.6' 'pyarrow==24.0.0'
+      - run: uv run --no-sync pytest -q -m "not browser"
   browser-and-package:
     runs-on: ubuntu-latest
     steps:

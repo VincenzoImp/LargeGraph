@@ -157,7 +157,7 @@ def generate_graph(
                     con.execute(
                         f"CREATE TABLE unique_edges AS SELECT source,target,min(sequence) AS first_seen FROM read_parquet({literal(candidate_dir / '*.parquet')}) GROUP BY source,target"
                     )
-                    unique = int(con.execute("SELECT count(*) FROM unique_edges").fetchone()[0])
+                    unique = int(con.execute("SELECT count(*) FROM unique_edges").fetchall()[0][0])
                 if edges == 0:
                     con.execute(
                         "CREATE TABLE unique_edges(source UINTEGER,target UINTEGER,first_seen UBIGINT)"

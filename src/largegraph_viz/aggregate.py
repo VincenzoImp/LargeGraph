@@ -60,13 +60,15 @@ def aggregate_graph(prepared: Path, clustering: Path, resources: Resources):
                 copy_query(con, "SELECT * FROM quotient", out / "edges.parquet")
                 total, internal = con.execute(
                     "SELECT coalesce(sum(weight),0),coalesce(sum(weight) FILTER (WHERE source=target),0) FROM quotient"
-                ).fetchone()
+                ).fetchall()[0]
                 internal_counts = np.zeros(k, dtype=np.uint64)
-                for batch in query_batches(
-                    con.execute("SELECT source,weight FROM quotient WHERE source=target"),
+                with query_batches(
+                    con,
+                    "SELECT source,weight FROM quotient WHERE source=target",
                     resources.batch_rows,
-                ):
-                    internal_counts[batch.column(0).to_numpy()] = batch.column(1).to_numpy()
+                ) as reader:
+                    for batch in reader:
+                        internal_counts[batch.column(0).to_numpy()] = batch.column(1).to_numpy()
                 nodes = pa.table(
                     {
                         "community": np.arange(k, dtype=np.uint32),

@@ -147,21 +147,19 @@ def build_hierarchy(quotient: Path, resources: Resources, targets=(16, 64, 256))
                     literal(quotient / "edges.parquet"),
                     literal(quotient / "nodes.parquet"),
                 )
-                result = con.execute(
-                    f"SELECT e.source,e.target FROM read_parquet({edge_path}) e JOIN read_parquet({node_path}) a ON e.source=a.community JOIN read_parquet({node_path}) b ON e.target=b.community WHERE e.source<>e.target ORDER BY e.weight::DOUBLE/sqrt(a.node_count::DOUBLE*b.node_count::DOUBLE) DESC,e.source,e.target"
-                )
-                reader = query_batches(result, resources.batch_rows)
-                for batch in reader:
-                    if not targets:
-                        break
-                    a, b = (batch.column(i).to_numpy() for i in (0, 1))
-                    cursor = 0
-                    while targets and cursor < len(a):
-                        cursor, remaining = merge_until(
-                            parents, sizes, a, b, cursor, remaining, targets[0]
-                        )
-                        if remaining <= targets[0]:
-                            save_cut(targets.pop(0))
+                query = f"SELECT e.source,e.target FROM read_parquet({edge_path}) e JOIN read_parquet({node_path}) a ON e.source=a.community JOIN read_parquet({node_path}) b ON e.target=b.community WHERE e.source<>e.target ORDER BY e.weight::DOUBLE/sqrt(a.node_count::DOUBLE*b.node_count::DOUBLE) DESC,e.source,e.target"
+                with query_batches(con, query, resources.batch_rows) as reader:
+                    for batch in reader:
+                        if not targets:
+                            break
+                        a, b = (batch.column(i).to_numpy() for i in (0, 1))
+                        cursor = 0
+                        while targets and cursor < len(a):
+                            cursor, remaining = merge_until(
+                                parents, sizes, a, b, cursor, remaining, targets[0]
+                            )
+                            if remaining <= targets[0]:
+                                save_cut(targets.pop(0))
                 if targets:
                     # Preserve the forest, even if its component count exceeds a requested cap.
                     save_cut(targets[-1])
