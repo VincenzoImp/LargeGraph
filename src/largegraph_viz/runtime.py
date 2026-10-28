@@ -128,11 +128,9 @@ def artifact_directory(destination: Path):
     destination = destination.resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
     lock = destination.parent / (destination.name + ".lock")
-    with lock.open("a") as handle:
-        # POSIX advisory lock releases on process death, unlike lock-file existence.
-        import fcntl
+    from .artifacts import file_lock
 
-        fcntl.flock(handle, fcntl.LOCK_EX)
+    with file_lock(lock):
         if destination.exists():
             raise FileExistsError(f"Artifact already exists: {destination}")
         temporary = destination.parent / (destination.name + ".inprogress")

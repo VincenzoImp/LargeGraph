@@ -10,12 +10,12 @@ from pathlib import Path
 import numpy as np
 from numba import njit
 
+from .artifacts import cached_directory, restart_partial
 from .numerics import move_block
 from .prepare import export_metis, neighbor_blocks, write_assignments
 from .runtime import (
     Monitor,
     Resources,
-    artifact_directory,
     environment,
     fingerprint,
     read_json,
@@ -44,17 +44,33 @@ def modularity(prepared: Path, labels, resolution=1.0, batch_rows=250_000):
     return internal / (total / 2) - resolution * float(np.square(volumes / total).sum())
 
 
-def native_cluster(prepared: Path, passes: int, resolution: float, resources: Resources):
+def native_cluster(
+    prepared: Path,
+    passes: int,
+    resolution: float,
+    resources: Resources,
+    checkpoint: Path | None = None,
+):
     degrees = np.load(prepared / "degrees.npy")
     n = len(degrees)
     labels = np.arange(n, dtype=np.uint32)
-    volumes = degrees.copy()
+    history = []
+    if checkpoint and (checkpoint / "pass.json").exists():
+        state = read_json(checkpoint / "pass.json")
+        labels = np.load(checkpoint / state["labels"])
+        if labels.shape != (n,) or labels.dtype != np.uint32 or labels.max(initial=0) >= n:
+            raise ValueError("Invalid clustering checkpoint")
+        history = state["history"]
+        LOG.info("Resuming after clustering pass %d", len(history))
+    volumes = np.zeros(n, dtype=np.uint64)
+    np.add.at(volumes, labels, degrees)
     scores = np.zeros(n)
     marks = np.zeros(n, dtype=np.uint32)
     touched = np.empty(max(1, int(degrees.max(initial=0))), dtype=np.uint32)
     total_degree = float(degrees.sum())
-    history = []
-    for iteration in range(passes):
+    for iteration in range(len(history), passes):
+        if history and history[-1]["moved_nodes"] == 0:
+            break
         marks.fill(0)
         moved = 0
         for start, end, offsets, neighbors in neighbor_blocks(prepared, resources.batch_rows * 4):
@@ -78,6 +94,14 @@ def native_cluster(prepared: Path, passes: int, resolution: float, resources: Re
         LOG.info("Streaming pass %d: %d moves; Q=%.6f", iteration + 1, moved, quality)
         if len(history) > 1 and quality + 1e-10 < history[-2]["modularity"]:
             raise RuntimeError("Local moves unexpectedly decreased modularity")
+        if checkpoint:
+            checkpoint.mkdir(exist_ok=True)
+            filename = f"labels-{iteration + 1}.npy"
+            np.save(checkpoint / filename, labels)
+            write_json(checkpoint / "pass.json", {"labels": filename, "history": history})
+            for previous in checkpoint.glob("labels-*.npy"):
+                if previous.name != filename:
+                    previous.unlink()
         if moved == 0:
             break
     _, labels = np.unique(labels, return_inverse=True)
@@ -155,18 +179,24 @@ def cluster_graph(
         "resolution": resolution,
         "binary": binary,
         "clustre_mode": clustre_mode,
-        "algorithm_version": 1,
+        "algorithm_version": 2,
     }
     if backend == "clustre":
         config["seed"] = seed
         config["adapter_version"] = 2
+    if backend == "leiden":
+        config["seed"] = seed
     destination = prepared.parent / ("cluster-" + signature(config)[:20])
-    if (destination / "manifest.json").exists():
-        return destination
-    with artifact_directory(destination) as out:
+    with cached_directory(destination) as out:
+        if out is None:
+            return destination
+        if backend != "streaming":
+            restart_partial(out)
         with Monitor(out) as monitor:
             if backend == "streaming":
-                labels, history = native_cluster(prepared, passes, resolution, resources)
+                labels, history = native_cluster(
+                    prepared, passes, resolution, resources, out / "passes"
+                )
                 algorithm = (
                     "semi-external sequential modularity local moving; not CluStRE or Leiden"
                 )
@@ -177,11 +207,47 @@ def cluster_graph(
                     prepared, out, clustre_binary, clustre_mode, resources, seed
                 )
                 algorithm = "CluStRE external binary"
+            elif backend == "leiden":
+                meta = read_json(prepared / "manifest.json")
+                if meta["nodes"] > 100_000 or meta["edges"] > 2_000_000:
+                    raise ValueError(
+                        "Leiden backend is bounded to 100,000 nodes and 2,000,000 edges; choose streaming for larger inputs"
+                    )
+                try:
+                    import igraph as ig
+                    import leidenalg as la
+                except ImportError as exc:
+                    raise ValueError("Leiden backend requires largegraph-viz[leiden]") from exc
+                from .prepare import batches
+
+                edges = []
+                for batch in batches(prepared / "edges.parquet", resources.batch_rows):
+                    edges.extend(
+                        zip(batch.column(0).to_pylist(), batch.column(1).to_pylist(), strict=True)
+                    )
+                graph = ig.Graph(n=meta["nodes"], edges=edges, directed=False)
+                partition = la.find_partition(
+                    graph,
+                    la.RBConfigurationVertexPartition,
+                    resolution_parameter=resolution,
+                    seed=seed,
+                    n_iterations=passes,
+                )
+                labels = np.asarray(partition.membership, dtype=np.uint32)
+                history = {
+                    "seed": seed,
+                    "iterations": passes,
+                    "mode": "bounded in-memory reference backend",
+                }
+                algorithm = "Leiden (leidenalg RBConfigurationVertexPartition)"
             else:
                 raise ValueError("Unknown clustering backend")
             np.save(out / "labels.npy", labels)
             write_assignments(out / "assignments.parquet", labels, resources.batch_rows)
             quality = modularity(prepared, labels, resolution, resources.batch_rows)
+        import shutil
+
+        shutil.rmtree(out / "passes", ignore_errors=True)
         write_json(
             out / "manifest.json",
             {

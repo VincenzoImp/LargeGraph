@@ -8,11 +8,11 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from .artifacts import cached_directory, restart_partial
 from .prepare import batches, copy_query, query_batches
 from .runtime import (
     Monitor,
     Resources,
-    artifact_directory,
     cleanup_scratch,
     environment,
     literal,
@@ -26,12 +26,13 @@ def aggregate_graph(prepared: Path, clustering: Path, resources: Resources):
     config = {
         "prepared": read_json(prepared / "manifest.json")["config"],
         "clustering": read_json(clustering / "manifest.json")["config"],
-        "version": 1,
+        "version": 2,
     }
     destination = prepared.parent / ("quotient-" + signature(config)[:20])
-    if (destination / "manifest.json").exists():
-        return destination
-    with artifact_directory(destination) as out:
+    with cached_directory(destination) as out:
+        if out is None:
+            return destination
+        restart_partial(out)
         with Monitor(
             out, spill_dir=Path(resources.temp_dir) if resources.temp_dir else None
         ) as monitor:
@@ -113,7 +114,7 @@ def display_reduction(quotient: Path, max_groups: int, resources: Resources):
 
     Fine quotient edges always stay on disk. Only a bounded dense display matrix
     is resident, so a quotient as large as the original graph is still safe.
-    Prefix selections make different display caps a nested hierarchy.
+    Prefix selections are nested display caps, not a topology-based hierarchy.
     """
     if not 2 <= max_groups <= 1024:
         raise ValueError("max_groups must be between 2 and 1024")

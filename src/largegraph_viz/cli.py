@@ -35,7 +35,9 @@ def input_options(parser, clustering=True):
         help="Extra full SHA-256 scan, recommended for paper runs",
     )
     if clustering:
-        parser.add_argument("--backend", choices=["streaming", "clustre"], default="streaming")
+        parser.add_argument(
+            "--backend", choices=["streaming", "clustre", "leiden"], default="streaming"
+        )
         parser.add_argument("--passes", type=int, default=5)
         parser.add_argument("--resolution", type=float, default=1)
         parser.add_argument("--clustre-binary", type=Path)
@@ -46,7 +48,12 @@ def input_options(parser, clustering=True):
 def build_parser():
     parser = argparse.ArgumentParser(description="Disk-backed large graph visualization")
     parser.add_argument("--verbose", action="store_true")
+    from . import __version__
+    from .workbench import add_commands
+
+    parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
+    add_commands(sub)
     gen = sub.add_parser("generate", help="Generate a fixed-m simple degree-corrected block graph")
     gen.add_argument(
         "--config",
@@ -107,6 +114,24 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
     raw_args = list(sys.argv[1:] if argv is None else argv)
+    from .workbench import COMMANDS, dispatch
+
+    if args.command in COMMANDS:
+        configure_threads(getattr(args, "threads", 2))
+        logging.basicConfig(
+            level=logging.DEBUG if args.verbose else logging.INFO,
+            format="%(asctime)s %(levelname)s %(message)s",
+        )
+        logging.getLogger("fontTools").setLevel(logging.WARNING)
+        try:
+            dispatch(args, raw_args)
+        except KeyboardInterrupt:
+            parser.exit(130, "Interrupted. Rerun the same analyze command to resume.\n")
+        except Exception as exc:
+            if args.verbose:
+                logging.getLogger(__name__).exception("Command failed")
+            parser.exit(2, f"error: {exc}\n")
+        return
     if args.command == "generate" and args.config:
         config = read_json(args.config)
         allowed = {
@@ -135,6 +160,25 @@ def main(argv=None):
                 )
     if args.threads < 1 or args.batch_rows < 1:
         parser.error("--threads and --batch-rows must be positive")
+    if args.command not in {"generate", "prepare"}:
+        from .config import AnalysisOptions
+
+        try:
+            AnalysisOptions(
+                passes=args.passes,
+                resolution=args.resolution,
+                backend=args.backend,
+                clustre_binary=args.clustre_binary,
+                clustre_mode=args.clustre_mode,
+                max_groups=args.max_groups,
+                max_edges=args.max_edges,
+                pixels=args.pixels,
+                hierarchy_targets=tuple(args.levels),
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
+        if args.coordinates and args.command not in {"density", "all"}:
+            parser.error("--coordinates is only valid for density/all")
     configure_threads(args.threads)
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,

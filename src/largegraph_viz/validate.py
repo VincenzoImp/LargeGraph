@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import math
-import random
 from pathlib import Path
 
 import numpy as np
@@ -27,7 +26,7 @@ def recovery_scores(truth, labels):
         from sklearn.metrics import adjusted_mutual_info_score
     except ImportError:
         result["adjusted_mutual_information"] = None
-        result["ami_unavailable_reason"] = "Install largegraph-viz[dev] for scikit-learn"
+        result["ami_unavailable_reason"] = "Install largegraph-viz[validation] for scikit-learn"
     else:
         result["adjusted_mutual_information"] = float(adjusted_mutual_info_score(truth, labels))
     return result
@@ -81,7 +80,11 @@ def reference_leiden(
     resolution=1.0,
 ):
     import igraph as ig
-    import leidenalg as la
+
+    try:
+        import leidenalg as la
+    except ImportError as exc:
+        raise ValueError("Leiden reference requires largegraph-viz[leiden]") from exc
 
     manifest = read_json(prepared / "manifest.json")
     if manifest["nodes"] > max_nodes or manifest["edges"] > max_edges:
@@ -94,7 +97,6 @@ def reference_leiden(
     edges = []
     for batch in batches(prepared / "edges.parquet", resources.batch_rows):
         edges.extend(zip(batch.column(0).to_pylist(), batch.column(1).to_pylist(), strict=True))
-    ig.set_random_number_generator(random.Random(seed))
     graph = ig.Graph(n=manifest["nodes"], edges=edges, directed=False)
     partition = la.find_partition(
         graph, la.RBConfigurationVertexPartition, resolution_parameter=resolution, seed=seed
