@@ -1,0 +1,7 @@
+{
+  "cpu_model": "AMD Ryzen 9 7950X 16-Core Processor",
+  "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+  "physical_cpu_cores": 16,
+  "logical_cpu_threads": 32,
+  "host_ram_bytes": 66513059840
+}

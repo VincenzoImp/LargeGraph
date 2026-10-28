@@ -1,0 +1,55 @@
+{
+  "all_checks_pass": true,
+  "checks": {
+    "adjacency_length_equals_2m": true,
+    "assignment_count_equals_n": true,
+    "canonical_edges": true,
+    "degree_sum_equals_2m": true,
+    "edge_rows_equal_m": true,
+    "offsets_match_degrees": true,
+    "quotient_edge_mass_equals_m": true,
+    "reported_modularity_matches": true
+  },
+  "clustering": "/home/tux/graph/largegraph-viz/work/bridges/cluster-cd74f0fffeb86151107f",
+  "degree_summary": {
+    "isolates": 1,
+    "max": 530,
+    "mean": 20.0,
+    "min": 0
+  },
+  "graph": {
+    "edges": 100000,
+    "nodes": 10000
+  },
+  "leiden_reference": {
+    "adjusted_mutual_information": 1.0,
+    "adjusted_rand_index": 1.0,
+    "communities": 13,
+    "connected_components": 2,
+    "global_transitivity": 0.06777007392190283,
+    "modularity": 0.8026552817,
+    "seed": 42,
+    "status": "completed",
+    "triangle_count_from_transitivity": 134244
+  },
+  "metrics": {
+    "peak_process_tree_rss_bytes": 526114816,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 5248,
+    "samples": 4,
+    "wall_seconds": 0.872014288790524
+  },
+  "modularity": 0.8026552817,
+  "planted_recovery": {
+    "adjusted_mutual_information": 0.9969431933675993,
+    "adjusted_rand_index": 0.9980854335147472
+  },
+  "realized_planted_connectivity": {
+    "additional_full_edge_scans": 1,
+    "between_edge_fraction": 0.08857,
+    "between_edges": 8857,
+    "blocks": 12,
+    "connectivity_matrix_exported": true,
+    "within_edges": 91143
+  }
+}

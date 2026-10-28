@@ -8,7 +8,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from .prepare import batches, copy_query
+from .prepare import batches, copy_query, query_batches
 from .runtime import (
     Monitor,
     Resources,
@@ -61,9 +61,10 @@ def aggregate_graph(prepared: Path, clustering: Path, resources: Resources):
                     "SELECT coalesce(sum(weight),0),coalesce(sum(weight) FILTER (WHERE source=target),0) FROM quotient"
                 ).fetchone()
                 internal_counts = np.zeros(k, dtype=np.uint64)
-                for batch in con.execute(
-                    "SELECT source,weight FROM quotient WHERE source=target"
-                ).fetch_record_batch(resources.batch_rows):
+                for batch in query_batches(
+                    con.execute("SELECT source,weight FROM quotient WHERE source=target"),
+                    resources.batch_rows,
+                ):
                     internal_counts[batch.column(0).to_numpy()] = batch.column(1).to_numpy()
                 nodes = pa.table(
                     {

@@ -1,0 +1,136 @@
+{
+  "cluster_metrics": {
+    "peak_process_tree_rss_bytes": 618012672,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 49169223,
+    "samples": 355,
+    "wall_seconds": 76.40230330824852
+  },
+  "edge_rows_per_second_prepare": 1375441.2751366394,
+  "edges": 500000000,
+  "nodes": 5000000,
+  "prepare_metrics": {
+    "peak_process_tree_rss_bytes": 3999469568,
+    "peak_spill_bytes": 9757130752,
+    "peak_working_disk_bytes": 30882664310,
+    "samples": 1763,
+    "wall_seconds": 363.5197002142668
+  },
+  "scenario": "communities",
+  "seed": 42,
+  "stages": [
+    {
+      "command": [
+        "/home/tux/graph/largegraph-viz/.venv/bin/python",
+        "-m",
+        "largegraph_viz.cli",
+        "generate",
+        "--output",
+        "runs/full-scale-data/n5000000-communities-s42/data",
+        "--nodes",
+        "5000000",
+        "--edges",
+        "500000000",
+        "--seed",
+        "42",
+        "--scenario",
+        "communities",
+        "--communities",
+        "512",
+        "--memory",
+        "3GB",
+        "--threads",
+        "2",
+        "--batch-rows",
+        "250000"
+      ],
+      "exit_code": 0,
+      "rss_guard_triggered": false,
+      "sample_interval_seconds": 0.1,
+      "sampled_peak_process_tree_rss_bytes": 4147277824,
+      "wall_seconds": 486.3452478488907
+    },
+    {
+      "command": [
+        "/home/tux/graph/largegraph-viz/.venv/bin/python",
+        "-m",
+        "largegraph_viz.cli",
+        "all",
+        "runs/full-scale-data/n5000000-communities-s42/data/edges.csv",
+        "--nodes-file",
+        "runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+        "--truth",
+        "runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+        "--work-dir",
+        "runs/full-scale-data/n5000000-communities-s42/work",
+        "--output",
+        "runs/full-scale-data/n5000000-communities-s42/figures",
+        "--seed",
+        "42",
+        "--hash-input",
+        "--pixels",
+        "1024",
+        "--levels",
+        "32",
+        "128",
+        "512",
+        "--memory",
+        "3GB",
+        "--threads",
+        "2",
+        "--batch-rows",
+        "250000"
+      ],
+      "exit_code": 0,
+      "rss_guard_triggered": false,
+      "sample_interval_seconds": 0.1,
+      "sampled_peak_process_tree_rss_bytes": 3999469568,
+      "wall_seconds": 501.66751408949494
+    }
+  ],
+  "validation": {
+    "all_checks_pass": true,
+    "checks": {
+      "adjacency_length_equals_2m": true,
+      "assignment_count_equals_n": true,
+      "canonical_edges": true,
+      "degree_sum_equals_2m": true,
+      "edge_rows_equal_m": true,
+      "offsets_match_degrees": true,
+      "quotient_edge_mass_equals_m": true,
+      "reported_modularity_matches": true
+    },
+    "clustering": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/work/cluster-8a080f636e3730b36c77",
+    "degree_summary": {
+      "isolates": 0,
+      "max": 6800,
+      "mean": 200.0,
+      "min": 41
+    },
+    "graph": {
+      "edges": 500000000,
+      "nodes": 5000000
+    },
+    "metrics": {
+      "peak_process_tree_rss_bytes": 1262350336,
+      "peak_spill_bytes": 0,
+      "peak_working_disk_bytes": 430974,
+      "samples": 133,
+      "wall_seconds": 28.72197185922414
+    },
+    "modularity": 0.909158592907265,
+    "planted_recovery": {
+      "adjusted_mutual_information": null,
+      "adjusted_rand_index": 1.0,
+      "ami_unavailable_reason": "Exact AMI is bounded to 100,000 nodes and 1 million pairs of truth/detected groups to avoid expensive expected-MI computation; ARI still uses all nodes"
+    },
+    "realized_planted_connectivity": {
+      "additional_full_edge_scans": 1,
+      "between_edge_fraction": 0.087751674,
+      "between_edges": 43875837,
+      "blocks": 512,
+      "connectivity_matrix_exported": true,
+      "within_edges": 456124163
+    }
+  }
+}

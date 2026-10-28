@@ -116,6 +116,9 @@ def main(argv=None):
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--sizes", type=int, nargs="+", default=[10_000, 100_000])
     parser.add_argument("--mean-degree", type=int, default=20)
+    parser.add_argument("--communities", type=int, default=12)
+    parser.add_argument("--levels", type=int, nargs="+", default=[16, 64])
+    parser.add_argument("--pixels", type=int, default=512)
     parser.add_argument(
         "--scenarios",
         nargs="+",
@@ -172,7 +175,7 @@ def main(argv=None):
                             "--scenario",
                             scenario,
                             "--communities",
-                            str(min(n, 12)),
+                            str(min(n, args.communities)),
                         ]
                         + common,
                         case,
@@ -196,10 +199,9 @@ def main(argv=None):
                         str(seed),
                         "--hash-input",
                         "--pixels",
-                        "512",
+                        str(args.pixels),
                         "--levels",
-                        "16",
-                        "64",
+                        *[str(level) for level in args.levels],
                     ]
                     + common
                 )

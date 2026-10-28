@@ -1,0 +1,44 @@
+{
+  "artificial_other": false,
+  "color_mapping": "SHA-256(display name) to HSV hue, independent of group size",
+  "environment": {
+    "logical_cpus": 32,
+    "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.12.13",
+    "versions": {
+      "duckdb": "1.5.6",
+      "igraph": "1.0.0",
+      "largegraph-viz": "0.1.0",
+      "leidenalg": "0.12.0",
+      "matplotlib": "3.11.2",
+      "numba": "0.68.1",
+      "numpy": "2.5.4",
+      "psutil": "7.2.2",
+      "pyarrow": "24.0.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    }
+  },
+  "filtering": {
+    "all_external_display_pairs": 130816,
+    "display_edge_pairs": 1200,
+    "omitted_external_edge_weight": 40628760,
+    "policy": "largest raw edge weights; filtering affects the image only",
+    "shown_external_edge_weight": 3247077
+  },
+  "layout": "igraph-Fruchterman-Reingold",
+  "layout_edge_weight": "log1p(raw edge count)",
+  "max_groups": 512,
+  "max_marker_area_points_squared": 80,
+  "metrics": {
+    "peak_process_tree_rss_bytes": 265940992,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 3310076,
+    "samples": 5,
+    "wall_seconds": 0.9156168345361948
+  },
+  "quotient": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/work/quotient-1fd39de54977106631bd",
+  "seed": 42,
+  "view": "community"
+}

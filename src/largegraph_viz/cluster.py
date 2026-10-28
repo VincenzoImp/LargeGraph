@@ -84,7 +84,9 @@ def native_cluster(prepared: Path, passes: int, resolution: float, resources: Re
     return labels.astype(np.uint32), history
 
 
-def clustre_cluster(prepared: Path, out: Path, binary: Path, mode: str, resources: Resources):
+def clustre_cluster(
+    prepared: Path, out: Path, binary: Path, mode: str, resources: Resources, seed=42
+):
     if not binary.is_file() or not os.access(binary, os.X_OK):
         raise ValueError("--clustre-binary must name an executable CluStRE installation")
     graph_path = out / "graph.metis"
@@ -96,16 +98,20 @@ def clustre_cluster(prepared: Path, out: Path, binary: Path, mode: str, resource
         str(graph_path.resolve()),
         "--one_pass_algorithm=modularity",
         f"--mode={mode}",
-        f"--output_path={results.resolve()}",
+        f"--seed={seed}",
+        f"--output_path={results.resolve()}{os.sep}",
     ]
     with (out / "clustre.log").open("w") as log:
-        subprocess.run(
+        process = subprocess.Popen(
             command,
             stdout=log,
             stderr=subprocess.STDOUT,
-            check=True,
             env={**os.environ, "OMP_NUM_THREADS": str(resources.threads)},
         )
+        _, status, usage = os.wait4(process.pid, 0)
+        process.returncode = os.waitstatus_to_exitcode(status)
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, command)
     candidates = list(results.glob("*.txt"))
     if len(candidates) != 1:
         raise RuntimeError(
@@ -121,6 +127,9 @@ def clustre_cluster(prepared: Path, out: Path, binary: Path, mode: str, resource
         "command": command,
         "binary": fingerprint(binary, True),
         "mode": mode,
+        "child_peak_rss_bytes": int(usage.ru_maxrss) * 1024,
+        "child_cpu_user_seconds": usage.ru_utime,
+        "child_cpu_system_seconds": usage.ru_stime,
     }
 
 
@@ -132,6 +141,7 @@ def cluster_graph(
     resolution=1.0,
     clustre_binary: Path | None = None,
     clustre_mode="light",
+    seed=42,
 ):
     if passes < 1 or not np.isfinite(resolution) or resolution <= 0:
         raise ValueError("passes and resolution must be positive")
@@ -147,6 +157,9 @@ def cluster_graph(
         "clustre_mode": clustre_mode,
         "algorithm_version": 1,
     }
+    if backend == "clustre":
+        config["seed"] = seed
+        config["adapter_version"] = 2
     destination = prepared.parent / ("cluster-" + signature(config)[:20])
     if (destination / "manifest.json").exists():
         return destination
@@ -161,7 +174,7 @@ def cluster_graph(
                 if clustre_binary is None:
                     raise ValueError("CluStRE backend requires --clustre-binary")
                 labels, history = clustre_cluster(
-                    prepared, out, clustre_binary, clustre_mode, resources
+                    prepared, out, clustre_binary, clustre_mode, resources, seed
                 )
                 algorithm = "CluStRE external binary"
             else:

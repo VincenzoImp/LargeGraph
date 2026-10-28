@@ -1,0 +1,55 @@
+{
+  "baseline": "/home/tux/graph/largegraph-viz/work/demo/cluster-369f57484b2d2b98b4b8",
+  "cases": [
+    {
+      "clustering": "/home/tux/graph/largegraph-viz/runs/order-sensitivity/seed-101/work/cluster-934fff5d0858e5327e17",
+      "comparison_to_original_order": {
+        "adjusted_mutual_information": 0.9554175653854087,
+        "adjusted_rand_index": 0.9062657154947535
+      },
+      "modularity": 0.7680987224,
+      "same_graph_up_to_bijection": true,
+      "seed": 101
+    },
+    {
+      "clustering": "/home/tux/graph/largegraph-viz/runs/order-sensitivity/seed-102/work/cluster-2577471c36dbce63f9f8",
+      "comparison_to_original_order": {
+        "adjusted_mutual_information": 0.9737631292227923,
+        "adjusted_rand_index": 0.9546453614817199
+      },
+      "modularity": 0.8039898542,
+      "same_graph_up_to_bijection": true,
+      "seed": 102
+    },
+    {
+      "clustering": "/home/tux/graph/largegraph-viz/runs/order-sensitivity/seed-103/work/cluster-e654dd4fe9c090f9044d",
+      "comparison_to_original_order": {
+        "adjusted_mutual_information": 0.9737631292227923,
+        "adjusted_rand_index": 0.9546453614817199
+      },
+      "modularity": 0.8039898542,
+      "same_graph_up_to_bijection": true,
+      "seed": 103
+    }
+  ],
+  "environment": {
+    "logical_cpus": 32,
+    "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.12.13",
+    "versions": {
+      "duckdb": "1.5.6",
+      "igraph": "1.0.0",
+      "largegraph-viz": "0.1.0",
+      "leidenalg": "0.12.0",
+      "matplotlib": "3.11.2",
+      "numba": "0.68.1",
+      "numpy": "2.5.4",
+      "psutil": "7.2.2",
+      "pyarrow": "24.0.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    }
+  },
+  "interpretation": "Same graph relabeled bijectively. Variation measures node-order dependence, not variation in the generated graph."
+}

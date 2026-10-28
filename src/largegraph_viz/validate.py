@@ -57,7 +57,12 @@ def align_truth(
             f"LEFT JOIN {truth_query} t ON n.original_id=t.{cnode} ORDER BY n.node_id"
         )
         # Only O(nodes), never O(edges).
-        table = con.execute(query).fetch_arrow_table()
+        result = con.execute(query)
+        table = (
+            result.to_arrow_table()
+            if hasattr(result, "to_arrow_table")
+            else result.fetch_arrow_table()
+        )
         if table["truth"].null_count:
             raise ValueError("Truth CSV is missing prepared graph nodes")
         return np.asarray(table["truth"].to_pylist())

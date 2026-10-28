@@ -86,12 +86,16 @@ Compute coordinates only for the bounded display graph. Candidate engines are
 Graphviz sfdp (Hu's multilevel force-directed method) and igraph's compiled
 Fruchterman–Reingold layout. The initial seed and actual engine are recorded.
 Raw edge weights are transformed with log(1+w) for layout and line width.
-Point area is proportional to vertex count. Colors identify display groups;
-they are not categorical labels inferred independently of the partition.
+Point area is proportional to vertex count; its scale adapts to the number of
+display groups, and an explicit size legend is shown. Colors are obtained from
+a stable hash of display identifiers, independently of group size. They identify display groups;
+they are not categorical labels inferred independently of the partition. IDs
+and colors do not establish group identity across different detection runs.
 
 Only the strongest display links may be rendered, with the omitted raw weight
 reported. The full weighted display table is exported and the exact quotient is
-never filtered. Distances, orientation, overlaps and apparent gaps depend on the
+never filtered. Groups with no visible links can still have many unshown links;
+their apparent isolation is not evidence of disconnection. Distances, orientation, overlaps and apparent gaps depend on the
 layout and are not measurements of graph distance.
 
 ## Matrix view

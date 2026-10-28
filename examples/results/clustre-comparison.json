@@ -1,0 +1,312 @@
+{
+  "light": {
+    "validation": {
+      "all_checks_pass": true,
+      "checks": {
+        "adjacency_length_equals_2m": true,
+        "assignment_count_equals_n": true,
+        "canonical_edges": true,
+        "degree_sum_equals_2m": true,
+        "edge_rows_equal_m": true,
+        "offsets_match_degrees": true,
+        "quotient_edge_mass_equals_m": true,
+        "reported_modularity_matches": true
+      },
+      "clustering": "/home/tux/graph/largegraph-viz/work/demo/cluster-b18475633280e7497bc3",
+      "degree_summary": {
+        "isolates": 0,
+        "max": 525,
+        "mean": 20.0,
+        "min": 1
+      },
+      "graph": {
+        "edges": 100000,
+        "nodes": 10000
+      },
+      "leiden_reference": {
+        "adjusted_mutual_information": 0.5550278931199714,
+        "adjusted_rand_index": 0.327284645039599,
+        "communities": 12,
+        "connected_components": 1,
+        "global_transitivity": 0.06607470162236789,
+        "modularity": 0.8039898542,
+        "seed": 42,
+        "status": "completed",
+        "triangle_count_from_transitivity": 131423
+      },
+      "metrics": {
+        "peak_process_tree_rss_bytes": 537997312,
+        "peak_spill_bytes": 0,
+        "peak_working_disk_bytes": 5476,
+        "samples": 4,
+        "wall_seconds": 0.8195968866348267
+      },
+      "modularity": 0.34005609975,
+      "planted_recovery": {
+        "adjusted_mutual_information": 0.5545551032355398,
+        "adjusted_rand_index": 0.3270497223117271
+      },
+      "realized_planted_connectivity": {
+        "additional_full_edge_scans": 1,
+        "between_edge_fraction": 0.088,
+        "between_edges": 8800,
+        "blocks": 12,
+        "connectivity_matrix_exported": true,
+        "within_edges": 91200
+      }
+    },
+    "clustering": {
+      "algorithm": "CluStRE external binary",
+      "communities": 824,
+      "config": {
+        "adapter_version": 2,
+        "algorithm_version": 1,
+        "backend": "clustre",
+        "binary": {
+          "mtime_ns": 1793177310757300566,
+          "path": "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "sha256": "cd1f3ec60b9b2025c6794b15ab438e3960a9b57a6f62b75ccc55c6ec3398f58c",
+          "size": 1668712
+        },
+        "clustre_mode": "light",
+        "passes": 5,
+        "prepared": {
+          "delimiter": ",",
+          "graph_contract": "undirected-unweighted-simple-drop-loops-deduplicate",
+          "ignore_extra_columns": false,
+          "inputs": {
+            "edges": {
+              "mtime_ns": 1793176887969938593,
+              "path": "/home/tux/graph/largegraph-viz/data/demo/edges.csv",
+              "sha256": "e1a4186709439d87efd49b4c423e55f6c3b4422da82775e40774d141589149f1",
+              "size": 976873
+            },
+            "nodes": {
+              "mtime_ns": 1793176887877938718,
+              "path": "/home/tux/graph/largegraph-viz/data/demo/nodes.csv",
+              "sha256": "42fc303f837fd9438be483559a5e502ae98f8f67439ffd66790cc2b88c512a18",
+              "size": 71593
+            }
+          },
+          "node_column": "node_id",
+          "schema": 1,
+          "source": "source",
+          "target": "target"
+        },
+        "resolution": 1,
+        "seed": 42
+      },
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.1.0",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "guarantees": "heuristic partition; no connectivity or optimality guarantee",
+      "history": {
+        "binary": {
+          "mtime_ns": 1793177310757300566,
+          "path": "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "sha256": "cd1f3ec60b9b2025c6794b15ab438e3960a9b57a6f62b75ccc55c6ec3398f58c",
+          "size": 1668712
+        },
+        "child_cpu_system_seconds": 0.036369,
+        "child_cpu_user_seconds": 0.012123,
+        "child_peak_rss_bytes": 139776000,
+        "command": [
+          "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "/home/tux/graph/largegraph-viz/work/demo/cluster-b18475633280e7497bc3.inprogress/graph.metis",
+          "--one_pass_algorithm=modularity",
+          "--mode=light",
+          "--seed=42",
+          "--output_path=/home/tux/graph/largegraph-viz/work/demo/cluster-b18475633280e7497bc3.inprogress/clustre-output/"
+        ],
+        "mode": "light"
+      },
+      "kind": "clustering",
+      "metrics": {
+        "peak_process_tree_rss_bytes": 176001024,
+        "peak_spill_bytes": 0,
+        "peak_working_disk_bytes": 132004,
+        "samples": 2,
+        "wall_seconds": 0.10480378288775682
+      },
+      "modularity": 0.34005609975,
+      "resources": {
+        "batch_rows": 250000,
+        "memory": "512MB",
+        "temp_dir": null,
+        "temp_limit": "80GB",
+        "threads": 2
+      }
+    }
+  },
+  "light_plus": {
+    "validation": {
+      "all_checks_pass": true,
+      "checks": {
+        "adjacency_length_equals_2m": true,
+        "assignment_count_equals_n": true,
+        "canonical_edges": true,
+        "degree_sum_equals_2m": true,
+        "edge_rows_equal_m": true,
+        "offsets_match_degrees": true,
+        "quotient_edge_mass_equals_m": true,
+        "reported_modularity_matches": true
+      },
+      "clustering": "/home/tux/graph/largegraph-viz/work/demo/cluster-9f0228a4f400fc92c05d",
+      "degree_summary": {
+        "isolates": 0,
+        "max": 525,
+        "mean": 20.0,
+        "min": 1
+      },
+      "graph": {
+        "edges": 100000,
+        "nodes": 10000
+      },
+      "leiden_reference": {
+        "adjusted_mutual_information": 0.9465662510022297,
+        "adjusted_rand_index": 0.878061977044321,
+        "communities": 12,
+        "connected_components": 1,
+        "global_transitivity": 0.06607470162236789,
+        "modularity": 0.8039898542,
+        "seed": 42,
+        "status": "completed",
+        "triangle_count_from_transitivity": 131423
+      },
+      "metrics": {
+        "peak_process_tree_rss_bytes": 613371904,
+        "peak_spill_bytes": 0,
+        "peak_working_disk_bytes": 5476,
+        "samples": 4,
+        "wall_seconds": 0.8250441290438175
+      },
+      "modularity": 0.71349557455,
+      "planted_recovery": {
+        "adjusted_mutual_information": 0.9461797020159414,
+        "adjusted_rand_index": 0.8775289796433157
+      },
+      "realized_planted_connectivity": {
+        "additional_full_edge_scans": 1,
+        "between_edge_fraction": 0.088,
+        "between_edges": 8800,
+        "blocks": 12,
+        "connectivity_matrix_exported": true,
+        "within_edges": 91200
+      }
+    },
+    "clustering": {
+      "algorithm": "CluStRE external binary",
+      "communities": 35,
+      "config": {
+        "adapter_version": 2,
+        "algorithm_version": 1,
+        "backend": "clustre",
+        "binary": {
+          "mtime_ns": 1793177310757300566,
+          "path": "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "sha256": "cd1f3ec60b9b2025c6794b15ab438e3960a9b57a6f62b75ccc55c6ec3398f58c",
+          "size": 1668712
+        },
+        "clustre_mode": "light_plus",
+        "passes": 5,
+        "prepared": {
+          "delimiter": ",",
+          "graph_contract": "undirected-unweighted-simple-drop-loops-deduplicate",
+          "ignore_extra_columns": false,
+          "inputs": {
+            "edges": {
+              "mtime_ns": 1793176887969938593,
+              "path": "/home/tux/graph/largegraph-viz/data/demo/edges.csv",
+              "sha256": "e1a4186709439d87efd49b4c423e55f6c3b4422da82775e40774d141589149f1",
+              "size": 976873
+            },
+            "nodes": {
+              "mtime_ns": 1793176887877938718,
+              "path": "/home/tux/graph/largegraph-viz/data/demo/nodes.csv",
+              "sha256": "42fc303f837fd9438be483559a5e502ae98f8f67439ffd66790cc2b88c512a18",
+              "size": 71593
+            }
+          },
+          "node_column": "node_id",
+          "schema": 1,
+          "source": "source",
+          "target": "target"
+        },
+        "resolution": 1,
+        "seed": 42
+      },
+      "environment": {
+        "logical_cpus": 32,
+        "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+        "processor": "",
+        "python": "3.12.13",
+        "versions": {
+          "duckdb": "1.5.6",
+          "igraph": "1.0.0",
+          "largegraph-viz": "0.1.0",
+          "leidenalg": "0.12.0",
+          "matplotlib": "3.11.2",
+          "numba": "0.68.1",
+          "numpy": "2.5.4",
+          "psutil": "7.2.2",
+          "pyarrow": "24.0.0",
+          "scikit-learn": "1.9.1",
+          "scipy": "1.18.1"
+        }
+      },
+      "guarantees": "heuristic partition; no connectivity or optimality guarantee",
+      "history": {
+        "binary": {
+          "mtime_ns": 1793177310757300566,
+          "path": "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "sha256": "cd1f3ec60b9b2025c6794b15ab438e3960a9b57a6f62b75ccc55c6ec3398f58c",
+          "size": 1668712
+        },
+        "child_cpu_system_seconds": 0.041192,
+        "child_cpu_user_seconds": 0.024305999999999998,
+        "child_peak_rss_bytes": 138158080,
+        "command": [
+          "/home/tux/graph/largegraph-viz/vendor/CluStRE/build/clustre",
+          "/home/tux/graph/largegraph-viz/work/demo/cluster-9f0228a4f400fc92c05d.inprogress/graph.metis",
+          "--one_pass_algorithm=modularity",
+          "--mode=light_plus",
+          "--seed=42",
+          "--output_path=/home/tux/graph/largegraph-viz/work/demo/cluster-9f0228a4f400fc92c05d.inprogress/clustre-output/"
+        ],
+        "mode": "light_plus"
+      },
+      "kind": "clustering",
+      "metrics": {
+        "peak_process_tree_rss_bytes": 170074112,
+        "peak_spill_bytes": 0,
+        "peak_working_disk_bytes": 123129,
+        "samples": 2,
+        "wall_seconds": 0.12310960981994867
+      },
+      "modularity": 0.71349557455,
+      "resources": {
+        "batch_rows": 250000,
+        "memory": "512MB",
+        "temp_dir": null,
+        "temp_limit": "80GB",
+        "threads": 2
+      }
+    }
+  }
+}

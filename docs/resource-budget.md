@@ -46,12 +46,24 @@ grouping. Dense requested graphs or badly concentrated proposals can need many
 top-up rounds and much longer runtimes. No claim of constant-time generation per
 retained edge is made near saturation.
 
+Disk monitoring sums logical file sizes. Sparse allocation, filesystem
+compression and sampled intervals can make actual allocated storage differ.
+
 The exact quotient can have O(m) distinct pairs. It is retained on disk; no
 algorithm loads the full quotient into a Python graph. Only a display matrix of
 at most 1024² weights is retained for layout and rendering. The original graph
 is not passed to NetworkX, igraph, sfdp or an in-memory Leiden implementation.
 The explicit Leiden validation reference is limited to 100,000 nodes and 2 million
 edges. These caps are intentionally separate from production-scale detection.
+
+The measured 5M/500M workload completed under a verified 8,000,000,000-byte cgroup
+cap and zero permitted swap. Peak sampled stage RSS was 4.15 GB in generation
+and 4.00 GB in preparation; native detection peaked around 0.62 GB. The cgroup
+reached its full 8 GB limit because it includes page cache. Kernel reclaim events
+were recorded without OOM events. The largest sampled preparation workspace was
+30.88 GB; the input dataset and retained outputs occupy additional storage.
+These measurements describe the archived synthetic workload, not arbitrary CSV
+identifier lengths or every possible degree distribution. See `verification.md`.
 
 Sources: [DuckDB out-of-core processing](https://duckdb.org/docs/current/guides/performance/how_to_tune_workloads),
 [DuckDB memory management](https://duckdb.org/2024/07/09/memory-management),

@@ -2,7 +2,11 @@
 
 Disk-backed analysis and visualization of edge lists larger than RAM. The target
 workload is **5 million nodes and 500 million undirected edges on a CPU-only
-machine with 8 GB RAM**. This is a design target, not a measured full-scale claim.
+machine with 8 GB RAM**. An actual synthetic run at that scale completed under a
+verified **8,000,000,000-byte cgroup limit with swap disabled**, using two threads.
+Generation and the full pipeline took about **16.5 minutes**, with a largest
+sampled stage process-tree RSS of **4.15 GB**. See [measured verification](docs/verification.md)
+for hardware, raw evidence, view settings and limitations; timing is specific to that workstation.
 
 Three views share one cached reduction:
 
@@ -11,6 +15,15 @@ Three views share one cached reduction:
 | `community` / `community_view.py` | Weighted node-link diagram, PNG/PDF/SVG and CSV | Relationships between detected groups |
 | `matrix` / `matrix_view.py` | Raw, density and degree-adjusted block matrices | Connectivity without depending on layout geometry |
 | `density` / `density_view.py` | Raster maps, raw pixel arrays, coordinates | Aggregated topology at multiple display caps, or all supplied node coordinates |
+
+Actual 5M-node / 500M-edge output, showing all 512 detected groups:
+
+![Community-level view](examples/figures/full-communities.png)
+
+[Connectivity matrices](examples/figures/full-matrix.png) ·
+[Multiscale density map](examples/figures/full-density.png) ·
+[Bridge-scenario example](examples/figures/bridge-communities.png) ·
+[Archived measurements](examples/results/README.md)
 
 Community counts and quotient edge weights use the **whole input**, not an edge
 sample. Detection is heuristic. Figure filtering and artificial `Other` groups
@@ -40,7 +53,7 @@ CluStRE is an optional external backend; see [its integration guide](docs/clustr
 
 ```bash
 .venv/bin/python scripts/generate_graph.py \
-  --output data/demo --nodes 10000 --edges 100000 \
+  --config configs/small.json --output data/demo --nodes 10000 --edges 100000 \
   --communities 12 --mixing 0.08 --seed 42 --memory 512MB
 
 .venv/bin/python scripts/render_all.py data/demo/edges.csv \
@@ -80,6 +93,20 @@ Options include `--source`, `--target`, `--delimiter`, `--nodes-file` and
 in the edge CSV are retained even if absent from the node CSV. CSVs need headers.
 Ground-truth files are used by validation only. The generator randomizes node IDs
 so adjacency order does not directly expose planted blocks.
+
+The archived exact 512-community graph in `examples/full-quotient` is small enough
+to inspect directly. Its Parquet edge weights sum to all 500 million original
+edges; internal edges occupy the diagonal once. It can also be rendered through
+the Python API without the original CSV:
+
+```python
+from pathlib import Path
+from largegraph_viz.runtime import Resources
+from largegraph_viz.views import render_community
+
+render_community(Path("examples/full-quotient"), Path("runs/from-summary"),
+                 Resources(), max_groups=512)
+```
 
 Preparation assigns stable, lexicographically ordered compact IDs. The mapping
 is saved as `nodes.parquet` (`node_id`, `original_id`). If genuine coordinates are
@@ -133,6 +160,23 @@ choices is detailed in [methodology](docs/methodology.md).
   --spill-only --spill-memory 64MB --spill-rows 4000000
 ```
 
+For a hard memory constraint on a Linux machine with a systemd user manager:
+
+```bash
+.venv/bin/python scripts/constrained_run.py --output runs/limited \
+  --memory-gb 8 --cpu-cores 8 -- \
+  .venv/bin/python scripts/benchmark.py --output runs/limited-data \
+  --sizes 100000 --mean-degree 200 --communities 32 --memory 3GB
+```
+
+The runner verifies actual cgroup limits, disables swap, records cgroup memory
+(including page cache and children), and retains the command, trace and log.
+The eight-core quota limits CPU time; it does not reproduce another CPU model.
+
+The recorded target-scale benchmark used the same runner with
+`--sizes 5000000 --mean-degree 200 --communities 512 --levels 32 128 512 --pixels 1024`.
+Its cgroup report and pipeline manifests are archived under `examples/results`.
+
 Each benchmark stage is a fresh subprocess. The sampled RSS guard terminates a
 stage exceeding the requested threshold, but is not a hard operating-system RAM
 limit. The spill experiment must observe nonzero temporary storage in DuckDB's
@@ -150,7 +194,7 @@ Run smaller benchmarks and check storage before starting this workload:
 .venv/bin/python scripts/render_all.py data/full/edges.csv \
   --nodes-file data/full/nodes.csv --truth data/full/nodes.csv \
   --work-dir work/full --output runs/full --memory 3GB --threads 2 \
-  --batch-rows 250000 --hash-input --levels 32 128 512
+  --batch-rows 250000 --hash-input --levels 32 128 512 --max-groups 512
 ```
 
 The generator produces exactly the requested number of **unique retained edges**,

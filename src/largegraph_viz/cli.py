@@ -84,7 +84,7 @@ def build_parser():
             "--seed",
             type=int,
             default=42,
-            help="Layout/reference seed; native clustering is deterministic",
+            help="Layout/reference and CluStRE seed; native clustering is deterministic",
         )
         view.add_argument("--layout", choices=["auto", "sfdp", "igraph"], default="auto")
         view.add_argument("--levels", type=int, nargs="+", default=[32, 128])
@@ -140,6 +140,7 @@ def main(argv=None):
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
     )
+    logging.getLogger("fontTools").setLevel(logging.WARNING)
     resources = Resources(
         memory=args.memory,
         threads=args.threads,
@@ -202,6 +203,7 @@ def main(argv=None):
             args.resolution,
             args.clustre_binary,
             args.clustre_mode,
+            seed=args.seed,
         )
         quotient = aggregate_graph(prepared, clustering, resources)
         args.output.mkdir(parents=True, exist_ok=True)

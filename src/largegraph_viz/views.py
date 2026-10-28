@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import random
 import shutil
 import subprocess
@@ -174,13 +175,23 @@ def render_community(
                 zorder=1,
             )
         )
-        colors = plt.colormaps["turbo"](np.linspace(0.1, 0.9, len(sizes)))
+        hues = np.array(
+            [
+                int(hashlib.sha256(name.encode()).hexdigest()[:12], 16) / 16**12
+                for name in reduction["names"]
+            ]
+        )
+        rgb = matplotlib.colors.hsv_to_rgb(
+            np.column_stack([hues, np.full(len(hues), 0.65), np.full(len(hues), 0.95)])
+        )
+        colors = np.column_stack([rgb, np.ones(len(hues))])
         if reduction["artificial_other"]:
             colors[-1] = matplotlib.colors.to_rgba("#9099a2")
         # Area is proportional to group size. No additive size offset.
-        areas = sizes.astype(float) / max(1, int(sizes.max())) * 1800
+        max_marker_area = min(1800, max(80, 24000 / len(sizes)))
+        areas = sizes.astype(float) / max(1, int(sizes.max())) * max_marker_area
         ax.scatter(*coords.T, s=areas, c=colors, edgecolors="#ecf0f5", linewidths=0.5, zorder=2)
-        for i in range(min(12, len(sizes))):
+        for i in range(min(12, len(sizes)) if len(sizes) <= 64 else 0):
             ax.annotate(
                 reduction["names"][i],
                 coords[i],
@@ -200,6 +211,33 @@ def render_community(
         ax.margins(0.12)
         ax.set_aspect("equal", adjustable="datalim")
         ax.axis("off")
+        reference_sizes = np.unique(
+            np.maximum(1, (sizes.max() * np.array([0.25, 0.5, 1])).astype(int))
+        )
+        handles = [
+            ax.scatter(
+                [],
+                [],
+                s=float(value) / int(sizes.max()) * max_marker_area,
+                color="#a4b2be",
+                edgecolors=FOREGROUND,
+                linewidths=0.5,
+                label=f"{int(value):,}",
+            )
+            for value in reference_sizes
+        ]
+        ax.legend(
+            handles=handles,
+            title="Nodes per group",
+            loc="lower right",
+            labelcolor=FOREGROUND,
+            facecolor=BACKGROUND,
+            edgecolor="#33414e",
+            framealpha=0.9,
+            fontsize=8,
+            title_fontsize=9,
+            labelspacing=1.0,
+        )
         ax.set_title("Community structure", loc="left", fontsize=25, pad=24, weight="bold")
         fig.text(
             0.13,
@@ -226,6 +264,8 @@ def render_community(
             "seed": seed,
             "layout": engine,
             "layout_edge_weight": "log1p(raw edge count)",
+            "max_marker_area_points_squared": max_marker_area,
+            "color_mapping": "SHA-256(display name) to HSV hue, independent of group size",
             "filtering": filtering,
             "artificial_other": reduction["artificial_other"],
             "metrics": monitor.stats,
@@ -241,7 +281,8 @@ def render_matrix(quotient: Path, output: Path, resources: Resources, max_groups
     with Monitor(output) as monitor:
         reduction = display_reduction(quotient, max_groups, resources)
         raw, expected, enrichment, density = matrix_arrays(reduction)
-        fig, axes = plt.subplots(1, 3, figsize=(17, 6.5))
+        fig, axes = plt.subplots(1, 3, figsize=(19, 7))
+        fig.subplots_adjust(left=0.06, right=0.96, top=0.82, bottom=0.20, wspace=0.65)
         max_raw = max(2, int(raw.max(initial=0)))
         images = [
             axes[0].imshow(
@@ -276,11 +317,11 @@ def render_matrix(quotient: Path, output: Path, resources: Resources, max_groups
                 ax.set_ylabel("Display group")
             fig.colorbar(image, ax=ax, fraction=0.046, pad=0.04, label=bar)
         fig.suptitle(
-            "Connectivity beyond the layout", fontsize=24, x=0.07, ha="left", y=1.01, weight="bold"
+            "Connectivity beyond the layout", fontsize=24, x=0.07, ha="left", y=0.98, weight="bold"
         )
         fig.text(
             0.07,
-            -0.04,
+            0.02,
             "All edges contribute. Expected adjacency uses the degree-volume configuration null; enrichment is descriptive, not a p-value.\n"
             + (
                 "The final group is an artificial collection of smaller communities."
@@ -365,7 +406,7 @@ def render_density(
                     else None
                 )
                 image = ax.imshow(
-                    np.ma.masked_less_equal(field, 0),
+                    np.ma.masked_less(field, norm.vmin if norm else 1e-12),
                     origin="lower",
                     cmap=cmap,
                     norm=norm,

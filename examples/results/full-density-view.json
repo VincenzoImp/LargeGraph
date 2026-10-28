@@ -1,0 +1,96 @@
+{
+  "edge_raster_semantics": "Each displayed pair contributes its raw edge count once per traversed pixel. Summing pixels is not the number of graph edges.",
+  "environment": {
+    "logical_cpus": 32,
+    "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.12.13",
+    "versions": {
+      "duckdb": "1.5.6",
+      "igraph": "1.0.0",
+      "largegraph-viz": "0.1.0",
+      "leidenalg": "0.12.0",
+      "matplotlib": "3.11.2",
+      "numba": "0.68.1",
+      "numpy": "2.5.4",
+      "psutil": "7.2.2",
+      "pyarrow": "24.0.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    }
+  },
+  "kind": "aggregated-topology-not-full-node-layout",
+  "levels": [
+    {
+      "artificial_other": true,
+      "bounds": [
+        -0.4627096583173321,
+        0.4740395990175327,
+        -0.4683330828970429,
+        0.46084740028445886
+      ],
+      "filtering": {
+        "all_external_display_pairs": 496,
+        "display_edge_pairs": 496,
+        "omitted_external_edge_weight": 0,
+        "policy": "largest raw edge weights; filtering affects the image only",
+        "shown_external_edge_weight": 14761079
+      },
+      "groups": 32,
+      "layout": "igraph-Fruchterman-Reingold",
+      "level": 32,
+      "node_mass": 5000000
+    },
+    {
+      "artificial_other": true,
+      "bounds": [
+        -0.5363504245235942,
+        0.5283005983604165,
+        -0.5272625337069552,
+        0.5327327159511769
+      ],
+      "filtering": {
+        "all_external_display_pairs": 8128,
+        "display_edge_pairs": 1200,
+        "omitted_external_edge_weight": 7207904,
+        "policy": "largest raw edge weights; filtering affects the image only",
+        "shown_external_edge_weight": 24966624
+      },
+      "groups": 128,
+      "layout": "igraph-Fruchterman-Reingold",
+      "level": 128,
+      "node_mass": 5000000
+    },
+    {
+      "artificial_other": false,
+      "bounds": [
+        -0.6592374699288106,
+        0.6572609851528137,
+        -0.6399877649900849,
+        0.6478849405189764
+      ],
+      "filtering": {
+        "all_external_display_pairs": 130816,
+        "display_edge_pairs": 1200,
+        "omitted_external_edge_weight": 40628760,
+        "policy": "largest raw edge weights; filtering affects the image only",
+        "shown_external_edge_weight": 3247077
+      },
+      "groups": 512,
+      "layout": "igraph-Fruchterman-Reingold",
+      "level": 512,
+      "node_mass": 5000000
+    }
+  ],
+  "metrics": {
+    "peak_process_tree_rss_bytes": 618389504,
+    "peak_spill_bytes": 0,
+    "peak_working_disk_bytes": 66496119,
+    "samples": 38,
+    "wall_seconds": 8.025770042091608
+  },
+  "pixels": 1024,
+  "quotient": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/work/quotient-1fd39de54977106631bd",
+  "seed": 42,
+  "view": "density"
+}

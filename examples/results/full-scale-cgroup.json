@@ -1,0 +1,47 @@
+{
+  "cgroup_memory_peak_bytes": 8000000000,
+  "command": [
+    ".venv/bin/python",
+    "scripts/benchmark.py",
+    "--output",
+    "runs/full-scale-data",
+    "--sizes",
+    "5000000",
+    "--mean-degree",
+    "200",
+    "--communities",
+    "512",
+    "--levels",
+    "32",
+    "128",
+    "512",
+    "--pixels",
+    "1024",
+    "--memory",
+    "3GB",
+    "--threads",
+    "2",
+    "--rss-limit-gb",
+    "6"
+  ],
+  "exit_code": 0,
+  "interpretation": "Cgroup memory includes page cache and child processes. CPU quota limits CPU time, not CPU model or physical frequency.",
+  "memory_events": {
+    "high": "0",
+    "low": "0",
+    "max": "116156",
+    "oom": "0",
+    "oom_group_kill": "0",
+    "oom_kill": "0"
+  },
+  "observed_limits": {
+    "cpu_max": "800000 100000",
+    "memory_max": "8000000000",
+    "memory_swap_max": "0"
+  },
+  "sampled_swap_peak_bytes": 0,
+  "samples": 4931,
+  "unit": "largegraph-349764bd3aec.service",
+  "verified_hard_limits": true,
+  "wall_seconds": 988.2022899314761
+}

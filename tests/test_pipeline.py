@@ -153,6 +153,19 @@ def test_cache_tracks_input_and_ignores_truth_labels(tmp_path):
     assert prepare_graph(source, tmp_path / "work", R) != a
 
 
+def test_detection_does_not_consume_planted_labels(tmp_path):
+    source = tmp_path / "edges.csv"
+    source.write_text("source,target\na,b\nb,c\nc,a\nc,d\n")
+    nodes = tmp_path / "nodes.csv"
+    nodes.write_text("node_id,planted_community\na,0\nb,0\nc,0\nd,1\n")
+    first = prepare_graph(source, tmp_path / "work", R, nodes_path=nodes)
+    original_labels = np.load(cluster_graph(first, R) / "labels.npy")
+    nodes.write_text("node_id,planted_community\na,9\nb,8\nc,7\nd,6\n")
+    second = prepare_graph(source, tmp_path / "work", R, nodes_path=nodes)
+    changed_truth_labels = np.load(cluster_graph(second, R) / "labels.npy")
+    np.testing.assert_array_equal(original_labels, changed_truth_labels)
+
+
 @pytest.mark.parametrize("contents", ["source,target\na,\n", "source,target,weight\na,b,5\n"])
 def test_malformed_or_implicitly_weighted_inputs_fail(tmp_path, contents):
     source = tmp_path / "edges.csv"

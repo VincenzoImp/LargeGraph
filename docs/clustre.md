@@ -13,6 +13,33 @@ Follow the upstream installation instructions and archive the source commit.
 Build with a conservative job count on an 8 GB machine; default `-j$(nproc)`
 dependency builds can consume much more memory than running the algorithm.
 
+The tested Linux build used upstream commit
+`39a4e57c2de0bee45a2752597db502963a1536de`, MPICH 5.0.2 from its Python wheel,
+and the following commands (no root/system MPI installation was needed):
+
+```bash
+uv sync --extra dev --extra clustre-build
+git clone https://github.com/KaHIP/CluStRE.git vendor/CluStRE
+git -C vendor/CluStRE checkout 39a4e57c2de0bee45a2752597db502963a1536de
+git -C vendor/CluStRE submodule update --init --recursive
+PATH="$PWD/.venv/bin:$PATH" cmake -S vendor/CluStRE -B vendor/CluStRE/build \
+  -DCMAKE_C_COMPILER="$PWD/.venv/bin/mpicc" \
+  -DCMAKE_CXX_COMPILER="$PWD/.venv/bin/mpicxx" \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DBUILD_TESTING=OFF \
+  -DKAGEN_USE_SPARSEHASH=OFF -DKAGEN_USE_CGAL=OFF
+cmake --build vendor/CluStRE/build --target clustre --parallel 2
+```
+
+The disabled options concern the bundled KaGen generator, which this CSV-based
+evaluation does not use. Keep `--extra clustre-build` when syncing this build
+environment so its MPI libraries remain installed. The adapter appends a path
+separator to `--output_path`: the upstream executable concatenates that prefix
+directly with filenames. This behavior is covered by actual-binary tests:
+
+```bash
+CLUSTRE_BINARY="$PWD/vendor/CluStRE/build/clustre" .venv/bin/pytest -q
+```
+
 Use the same CSV and workspace for a direct comparison:
 
 ```bash
@@ -31,7 +58,7 @@ Use the same CSV and workspace for a direct comparison:
 
 The adapter streams a METIS text file, which contains one adjacency line per
 vertex and both directions for every edge. It records the binary SHA-256,
-command, mode and stdout/stderr log. Output must contain exactly one assignment
+command, mode, explicit `--seed` and stdout/stderr log. Output must contain exactly one assignment
 per vertex, with nonnegative labels. IDs are normalized to compact community
 indices before exact aggregation. The temporary METIS graph is removed after
 successful import; logs and original output assignments are retained.

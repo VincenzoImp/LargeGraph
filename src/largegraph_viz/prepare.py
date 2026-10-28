@@ -32,6 +32,12 @@ def batches(path: Path, batch_rows: int = 250_000, columns=None):
     yield from pq.ParquetFile(path).iter_batches(batch_size=batch_rows, columns=columns)
 
 
+def query_batches(connection, batch_rows):
+    if hasattr(connection, "to_arrow_reader"):
+        return connection.to_arrow_reader(batch_rows)
+    return connection.fetch_record_batch(batch_rows)
+
+
 def copy_query(con, query: str, path: Path, csv: bool = False):
     options = (
         "FORMAT CSV, HEADER true"
@@ -150,9 +156,12 @@ def prepare_graph(
             np.cumsum(degrees, out=offsets[1:])
             np.save(out / "offsets.npy", offsets)
             # DuckDB sorts externally. Stream Arrow batches into a flat little-endian file.
-            reader = con.execute(
-                "SELECT target FROM (SELECT source,target FROM edges UNION ALL SELECT target AS source,source AS target FROM edges) ORDER BY source,target"
-            ).fetch_record_batch(resources.batch_rows)
+            reader = query_batches(
+                con.execute(
+                    "SELECT target FROM (SELECT source,target FROM edges UNION ALL SELECT target AS source,source AS target FROM edges) ORDER BY source,target"
+                ),
+                resources.batch_rows,
+            )
             with (out / "neighbors.u32").open("wb") as stream:
                 for batch in reader:
                     batch.column(0).to_numpy().astype("<u4", copy=False).tofile(stream)
