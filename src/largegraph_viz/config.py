@@ -43,7 +43,7 @@ class AnalysisOptions:
             not 2 <= item <= 1024 for item in self.hierarchy_targets
         ):
             raise ValueError("hierarchy_targets must contain values between 2 and 1024")
-        if self.backend not in {"streaming", "clustre", "leiden"}:
+        if self.backend not in {"streaming", "clustre", "leiden", "networkit"}:
             raise ValueError("Unknown clustering backend")
         if self.backend == "clustre":
             if not self.clustre_binary or not self.clustre_binary.is_file():

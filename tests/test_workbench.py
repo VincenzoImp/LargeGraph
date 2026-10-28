@@ -30,8 +30,8 @@ def test_complete_analysis_portable_report_and_index(source, tmp_path):
         source, tmp_path / "run", resources=R, options=AnalysisOptions(hierarchy_targets=(2, 4))
     )
     assert result.report.is_file()
-    assert "__REPORT_DATA__" not in result.report.read_text()
-    assert "https://cdn" not in result.report.read_text()
+    assert "__REPORT_DATA__" not in result.report.read_text(encoding="utf-8")
+    assert "https://cdn" not in result.report.read_text(encoding="utf-8")
     assert Analysis.open(result.output) == result
     query = result.neighbors("001", limit=1)
     assert query["node"]["original_id"] == "001"
@@ -134,7 +134,7 @@ def test_failed_report_preserves_expensive_completed_work(source, tmp_path, monk
         analyze(source, run, resources=R)
     assert read_json(run / "analysis.json")["status"] == "failed"
     assert not (run / "report").exists()
-    preparation = next((run / "cache").glob("prepared-*"))
+    preparation = next(path for path in (run / "cache").glob("prepared-*") if path.is_dir())
     modified = (preparation / "manifest.json").stat().st_mtime_ns
     monkeypatch.setattr(report, "write_report", original)
     result = analyze(source, run, resources=R)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from contextlib import ExitStack
 from pathlib import Path
 
 import matplotlib
@@ -412,8 +413,11 @@ def render_coordinates(
     if not 64 <= pixels <= 4096:
         raise ValueError("pixels must be between 64 and 4096")
     output.mkdir(parents=True, exist_ok=True)
-    with style(), Monitor(output) as monitor:
+    with style(), Monitor(output) as monitor, ExitStack() as cleanup:
         xy = np.load(coordinate_file, mmap_mode="r")
+        if not isinstance(xy, np.memmap):
+            raise ValueError("Coordinates must be a numeric N x 2 .npy array")
+        cleanup.callback(xy._mmap.close)
         n = read_json(prepared / "manifest.json")["nodes"]
         if (
             xy.shape != (n, 2)

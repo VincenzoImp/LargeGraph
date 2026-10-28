@@ -43,7 +43,9 @@ def add_commands(sub) -> None:
     run.add_argument("--nodes-file", type=Path)
     run.add_argument("--passes", type=int, default=5)
     run.add_argument("--resolution", type=float, default=1)
-    run.add_argument("--backend", choices=["streaming", "clustre", "leiden"], default="streaming")
+    run.add_argument(
+        "--backend", choices=["streaming", "clustre", "leiden", "networkit"], default="streaming"
+    )
     run.add_argument("--clustre-binary", type=Path)
     run.add_argument("--clustre-mode", choices=["light", "light_plus"], default="light")
     run.add_argument("--seed", type=int, default=42)
@@ -189,7 +191,7 @@ def dispatch(args, raw_args: list[str]) -> None:
             temp_dir=str(args.temp_dir.resolve()) if args.temp_dir else None,
             temp_limit=args.temp_limit,
         )
-        if args.images:
+        if options.images:
             import importlib.util
 
             for package in ("matplotlib", "scipy"):

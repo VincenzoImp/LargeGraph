@@ -77,6 +77,7 @@ def analyze(
     analysis configuration requires a different output directory. Resource
     settings can change on retry without changing the graph's meaning.
     """
+    import importlib.util
     import os
 
     from .aggregate import aggregate_graph
@@ -89,6 +90,14 @@ def analyze(
     from .validate import validate_graph
 
     options, resources = options or AnalysisOptions(), resources or default_resources(ram)
+    for package, extra, needed in (
+        ("matplotlib", "images", options.images),
+        ("scipy", "images", options.images),
+        ("leidenalg", "leiden", options.backend == "leiden"),
+        ("networkit", "networkit", options.backend == "networkit"),
+    ):
+        if needed and importlib.util.find_spec(package) is None:
+            raise ValueError(f"This analysis requires largegraph-viz[{extra}]")
     output = Path(output).resolve()
     work_dir = Path(work_dir).resolve() if work_dir else output / "cache"
     config = {

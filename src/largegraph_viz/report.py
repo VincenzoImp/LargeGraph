@@ -115,6 +115,7 @@ def report_data(
                 "edges": [
                     [int(u), int(v), int(weight)] for u, v, weight in zip(a, b, w, strict=True)
                 ],
+                "edge_cap": max_edges,
                 "filtering": filtering,
                 "layout": engine,
                 "artificial_other": reduction["artificial_other"],

@@ -84,7 +84,7 @@ def preflight(
         warnings.append("Estimated workspace exceeds free disk; use a larger SSD/work directory")
     available = available_memory()
     target = size_bytes(ram)
-    if target > available:
+    if target > available * 1.1:
         warnings.append(
             "RAM target exceeds currently available memory; lower --ram or close other jobs"
         )

@@ -71,12 +71,14 @@ def configure_threads(threads: int):
 def write_json(path: Path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n")
+    tmp.write_text(
+        json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
+    )
     tmp.replace(path)
 
 
 def read_json(path: Path):
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def signature(value) -> str:
@@ -110,6 +112,7 @@ def environment() -> dict:
         "numba",
         "psutil",
         "scikit-learn",
+        "networkit",
     ):
         with contextlib.suppress(importlib.metadata.PackageNotFoundError):
             versions[package] = importlib.metadata.version(package)
