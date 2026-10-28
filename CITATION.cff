@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "Please cite the specific software revision, archived manifests and the method papers in docs/references.bib."
+title: largegraph-viz
+authors:
+  - name: largegraph-viz contributors
+type: software
+version: 0.1.0
+license: MIT
+abstract: "CPU-only disk-backed graph preparation, heuristic community detection, exact quotient aggregation and complementary large-network views."
+keywords:
+  - graph visualization
+  - streaming
+  - out-of-core
+  - community detection

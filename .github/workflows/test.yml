@@ -1,0 +1,22 @@
+name: test
+on: [push, pull_request]
+jobs:
+  scientific-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check .
+      - run: pytest -q
+      - run: python scripts/generate_graph.py --output data/smoke --nodes 2000 --edges 20000 --communities 8 --memory 256MB
+      - run: python scripts/render_all.py data/smoke/edges.csv --nodes-file data/smoke/nodes.csv --truth data/smoke/nodes.csv --work-dir work/smoke --output runs/smoke --pixels 256 --levels 8 16 --reference --memory 256MB
+      - uses: actions/upload-artifact@v4
+        with:
+          name: figures-${{ matrix.python }}
+          path: runs/smoke

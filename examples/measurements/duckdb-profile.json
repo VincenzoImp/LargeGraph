@@ -1,0 +1,100 @@
+{
+    "total_bytes_written": 0,
+    "total_bytes_read": 0,
+    "system_peak_temp_dir_size": 293863424,
+    "system_peak_buffer_memory": 72990720,
+    "rows_returned": 1,
+    "wal_replay_entry_count": 0,
+    "result_set_size": 8,
+    "query_name": "COPY (SELECT i, hash(i) AS h, repeat('x', 80) AS payload FROM range(4000000) t(i) ORDER BY h) TO 'runs/offline-spill-v2/spill/sorted.parquet' (FORMAT PARQUET, COMPRESSION ZSTD)",
+    "waiting_to_attach_latency": 0.0,
+    "attach_load_storage_latency": 0.0,
+    "blocked_thread_time": 0.0,
+    "cpu_time": 1.1476361359999994,
+    "extra_info": {},
+    "total_memory_allocated": 1517289472,
+    "cumulative_cardinality": 12000001,
+    "checkpoint_latency": 0.0,
+    "cumulative_rows_scanned": 4000000,
+    "write_to_wal_latency": 0.0,
+    "latency": 1.210966174,
+    "attach_replay_wal_latency": 0.0,
+    "commit_local_storage_latency": 0.0,
+    "children": [
+        {
+            "system_peak_temp_dir_size": 0,
+            "system_peak_buffer_memory": 0,
+            "result_set_size": 8,
+            "operator_timing": 0.4267503760000007,
+            "operator_type": "COPY_TO_FILE",
+            "cpu_time": 1.1476353839999993,
+            "extra_info": {},
+            "cumulative_cardinality": 12000001,
+            "cumulative_rows_scanned": 4000000,
+            "operator_cardinality": 1,
+            "operator_name": "COPY_TO_FILE",
+            "operator_rows_scanned": 0,
+            "children": [
+                {
+                    "system_peak_temp_dir_size": 0,
+                    "system_peak_buffer_memory": 0,
+                    "result_set_size": 128000000,
+                    "operator_timing": 0.7156561749999987,
+                    "operator_type": "ORDER_BY",
+                    "cpu_time": 0.7208850079999987,
+                    "extra_info": {
+                        "Order By": "hash(t.i) ASC"
+                    },
+                    "cumulative_cardinality": 12000000,
+                    "cumulative_rows_scanned": 4000000,
+                    "operator_cardinality": 4000000,
+                    "operator_name": "ORDER_BY",
+                    "operator_rows_scanned": 0,
+                    "children": [
+                        {
+                            "system_peak_temp_dir_size": 0,
+                            "system_peak_buffer_memory": 0,
+                            "result_set_size": 128000000,
+                            "operator_timing": 0.004665143999999983,
+                            "operator_type": "PROJECTION",
+                            "cpu_time": 0.005228832999999982,
+                            "extra_info": {
+                                "Projections": [
+                                    "i",
+                                    "h",
+                                    "payload"
+                                ],
+                                "Estimated Cardinality": "4000000"
+                            },
+                            "cumulative_cardinality": 8000000,
+                            "cumulative_rows_scanned": 4000000,
+                            "operator_cardinality": 4000000,
+                            "operator_name": "PROJECTION",
+                            "operator_rows_scanned": 0,
+                            "children": [
+                                {
+                                    "system_peak_temp_dir_size": 0,
+                                    "system_peak_buffer_memory": 0,
+                                    "result_set_size": 32000000,
+                                    "operator_timing": 0.0005636889999999995,
+                                    "operator_type": "TABLE_SCAN",
+                                    "cpu_time": 0.0005636889999999995,
+                                    "extra_info": {
+                                        "Function": "RANGE",
+                                        "Estimated Cardinality": "4000000"
+                                    },
+                                    "cumulative_cardinality": 4000000,
+                                    "cumulative_rows_scanned": 4000000,
+                                    "operator_cardinality": 4000000,
+                                    "operator_name": "RANGE",
+                                    "operator_rows_scanned": 4000000,
+                                    "children": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

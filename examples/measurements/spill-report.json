@@ -1,0 +1,25 @@
+{
+  "environment": {
+    "logical_cpus": 32,
+    "platform": "Linux-6.12.101+deb13-amd64-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.11.15",
+    "versions": {
+      "duckdb": "1.5.5",
+      "psutil": "7.2.2",
+      "pyarrow": "21.0.0"
+    }
+  },
+  "memory": "64MB",
+  "metrics": {
+    "peak_process_tree_rss_bytes": 175726592,
+    "peak_spill_bytes": 293863424,
+    "peak_working_disk_bytes": 333516800,
+    "samples": 62,
+    "wall_seconds": 1.2618276858702302
+  },
+  "profile_peak_temp_dir_bytes": 293863424,
+  "rows": 4000000,
+  "threads": 1,
+  "verified_disk_spill": true
+}

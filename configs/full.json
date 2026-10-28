@@ -1,0 +1,14 @@
+{
+  "nodes": 5000000,
+  "edges": 500000000,
+  "communities": 512,
+  "mixing": 0.08,
+  "seed": 42,
+  "scenario": "communities",
+  "memory": "3GB",
+  "threads": 2,
+  "batch_rows": 250000,
+  "temp_limit": "80GB",
+  "estimated_working_space_bytes": 100000000000,
+  "estimate_is_not_a_guarantee": true
+}
