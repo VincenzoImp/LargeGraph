@@ -183,7 +183,7 @@ def test_cgroup_headroom_accounts_for_reclaimable_input_cache(monkeypatch):
     original = Path.read_text
 
     def read(path, *args, **kwargs):
-        if str(path) == "/proc/self/cgroup" or "graph-budget-test" in str(path):
+        if path.as_posix() == "/proc/self/cgroup" or "graph-budget-test" in str(path):
             return files[path.name]
         return original(path, *args, **kwargs)
 
