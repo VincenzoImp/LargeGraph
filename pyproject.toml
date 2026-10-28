@@ -22,6 +22,10 @@ clustre-build = ["mpich>=4,<6; sys_platform == 'linux'"]
 [project.scripts]
 largegraph-viz = "largegraph_viz.cli:main"
 
+[project.urls]
+Repository = "https://github.com/VincenzoImp/largegraph-viz"
+Documentation = "https://github.com/VincenzoImp/largegraph-viz/blob/main/docs/methodology.md"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
