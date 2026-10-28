@@ -1,0 +1,35 @@
+{
+  "arrays": {
+    "degrees.npy": {
+      "baseline": "c6f591072f7d6cb370d6ef05fb0de7dae25c6a9fdd398940d5df7a0ff268a54c",
+      "bytes": 40000128,
+      "identical_sha256": true,
+      "new": "c6f591072f7d6cb370d6ef05fb0de7dae25c6a9fdd398940d5df7a0ff268a54c"
+    },
+    "labels.npy": {
+      "baseline": "c28cb39e5fda2f9718f244d5a79a93ac75c30c3a53f1aa17fddf900ba2f2a098",
+      "bytes": 20000128,
+      "identical_sha256": true,
+      "new": "c28cb39e5fda2f9718f244d5a79a93ac75c30c3a53f1aa17fddf900ba2f2a098"
+    },
+    "neighbors.u32": {
+      "baseline": "bf421181084c51df701e74882088e667b017be8f84dfc40c4e34b90cdfaed0c7",
+      "bytes": 4000000000,
+      "identical_sha256": true,
+      "new": "bf421181084c51df701e74882088e667b017be8f84dfc40c4e34b90cdfaed0c7"
+    },
+    "offsets.npy": {
+      "baseline": "7a1d89a5edb2c8a30ea661e37c3b72d07f63ef8f16809a46f9b00b7161b6b273",
+      "bytes": 40000136,
+      "identical_sha256": true,
+      "new": "7a1d89a5edb2c8a30ea661e37c3b72d07f63ef8f16809a46f9b00b7161b6b273"
+    }
+  },
+  "baseline_modularity": 0.909158592907265,
+  "baseline_run": "release-cold-final",
+  "candidate_modularity": 0.909158592907265,
+  "candidate_source_commit": "7d8a1e9a5a3624c225fbac44e14b579fb1a2b5f3",
+  "compared_original_node_mapping_rows": 5000000,
+  "interpretation": "SHA-256-identical CSR, degree/offset arrays and labels; every original node mapping row compared. Timings are descriptive shared-workstation measurements, not a controlled speedup claim.",
+  "original_node_mapping_equal": true
+}
