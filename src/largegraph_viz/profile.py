@@ -44,7 +44,7 @@ def compress_roots(parents):
 def profile_graph(prepared: Path, resources: Resources) -> Path:
     """Count all connected components, including isolates; no sampled statistics."""
     meta = read_json(prepared / "manifest.json")
-    config = {"prepared": meta["config"], "version": 1}
+    config = {"prepared": meta["config"], "version": 2}
     destination = prepared.parent / ("profile-" + signature(config)[:20])
     with cached_directory(destination) as out:
         if out is None:
@@ -60,7 +60,9 @@ def profile_graph(prepared: Path, resources: Resources) -> Path:
             _, inverse, counts = np.unique(parents, return_inverse=True, return_counts=True)
             labels = inverse.astype(np.uint32)
             np.save(out / "components.npy", labels)
-            write_assignments(out / "components.parquet", labels, resources.batch_rows)
+            write_assignments(
+                out / "components.parquet", labels, resources.batch_rows, column="component"
+            )
             degrees = np.load(prepared / "degrees.npy")
             component_volumes = np.zeros(len(counts), dtype=np.uint64)
             np.add.at(component_volumes, labels, degrees)

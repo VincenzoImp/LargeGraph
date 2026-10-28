@@ -20,6 +20,7 @@ Optional runtime extras:
 
 - `images`: Matplotlib and SciPy for raster/vector figures and Gaussian smoothing.
 - `leiden`: leidenalg for a bounded quality backend/reference.
+- `networkit`: NetworKit for bounded parallel Louvain on Linux/macOS.
 - `validation`: scikit-learn for adjusted mutual information. ARI and exact
   conservation checks do not require it.
 - `clustre-build`: Linux mpich build dependency. CluStRE itself is an external,
@@ -27,7 +28,8 @@ Optional runtime extras:
 
 `setuptools` is a build dependency. `pytest`, Ruff, mypy, build, Twine and coverage
 are in the contributor `dev` group. Playwright/Chromium are in the `browser`
-group. None is required by an installed base wheel. Node/npm were used only to
+group. NetworKit is isolated in the `benchmarks` group for comparisons. None
+of these contributor tools is required by an installed base wheel. Node/npm were used only to
 format the HTML source during development; the delivered viewer has no JavaScript
 package dependency, CDN, build step or network requirement.
 

@@ -11,12 +11,20 @@ from urllib.parse import parse_qs, urlparse
 from .api import Analysis
 
 
-def serve(output: Path, port: int = 8765) -> None:
+def create_server(output: Path, port: int = 8765) -> ThreadingHTTPServer:
+    """Create a loopback-only server; caller owns shutdown and close."""
     analysis = Analysis.open(output)
     report = analysis.report
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
+            allowed = {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }
+            if self.headers.get("Host") not in allowed:
+                self.respond(403, {"error": "Only localhost requests are accepted"})
+                return
             url = urlparse(self.path)
             params = parse_qs(url.query)
 
@@ -65,7 +73,11 @@ def serve(output: Path, port: int = 8765) -> None:
             logging.getLogger(__name__).debug(format, *args)
 
     # The server never binds to a public interface or exposes arbitrary files.
-    with ThreadingHTTPServer(("127.0.0.1", port), Handler) as http:
+    return ThreadingHTTPServer(("127.0.0.1", port), Handler)
+
+
+def serve(output: Path, port: int = 8765) -> None:
+    with create_server(output, port) as http:
         print(f"Graph explorer: http://127.0.0.1:{http.server_port} (Ctrl-C to stop)", flush=True)
         try:
             http.serve_forever()

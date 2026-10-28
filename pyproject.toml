@@ -9,7 +9,7 @@ description = "A local CPU-only workbench for exploring graphs larger than RAM"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 authors = [{name = "largegraph-viz contributors"}]
 keywords = ["graph", "visualization", "out-of-core", "community-detection", "network-analysis"]
 classifiers = [
@@ -30,12 +30,16 @@ dependencies = [
 [project.optional-dependencies]
 images = ["matplotlib>=3.9,<4", "scipy>=1.13,<2"]
 leiden = ["leidenalg>=0.10,<1"]
+networkit = ["networkit>=11,<12; sys_platform != 'win32'"]
 validation = ["scikit-learn>=1.5,<2"]
 clustre-build = ["mpich>=4,<6; sys_platform == 'linux'"]
 
 [dependency-groups]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.15,<2", "build>=1.2,<2", "twine>=6,<7", "pytest-cov>=6,<8"]
 browser = ["playwright>=1.51,<2"]
+benchmarks = [
+    "networkit>=11,<12",
+]
 
 [project.scripts]
 largegraph-viz = "largegraph_viz.cli:main"

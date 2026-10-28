@@ -1,0 +1,14 @@
+{
+  "OS_page_cache_not_flushed": true,
+  "generation_excluded": true,
+  "query_50_ids_0_to_49": {
+    "cache_state": "OS caches not flushed; sequential lookups",
+    "limit": 100,
+    "max_seconds": 0.0006701033562421799,
+    "median_seconds": 0.0005705421790480614
+  },
+  "report_bytes": 2008797,
+  "scope": "Final independent overview layout and viewer, reusing completed engine artifacts",
+  "shared_host_not_reserved_for_benchmark": true,
+  "source_commit": "1d335b5fb66a3bf9e58fe8ff3f76ecf051512757"
+}

@@ -77,3 +77,11 @@ unsmoothed grids alongside publication figures.
 
 The software and test suite implement these measurements. A run not yet performed
 is not a passed acceptance criterion; see `verification.md` for actual status.
+
+
+## Public beta comparisons
+
+The [Facebook case](comparisons.md) includes fresh-process native, Leiden and
+NetworKit measurements. It reports differing algorithm budgets and quality, not
+a winner for all graphs. The new workbench's full-scale evidence is tracked
+[separately](verification-beta.md) from the original 0.1 benchmark.

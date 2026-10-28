@@ -251,8 +251,8 @@ def export_metis(prepared: Path, destination: Path, max_entries: int = 2_000_000
     temporary.replace(destination)
 
 
-def write_assignments(path: Path, labels, batch_rows: int = 250_000):
-    schema = pa.schema([("node_id", pa.uint32()), ("community", pa.uint32())])
+def write_assignments(path: Path, labels, batch_rows: int = 250_000, column="community"):
+    schema = pa.schema([("node_id", pa.uint32()), (column, pa.uint32())])
     with pq.ParquetWriter(path, schema, compression="zstd") as writer:
         for begin in range(0, len(labels), batch_rows):
             end = min(begin + batch_rows, len(labels))
@@ -260,7 +260,7 @@ def write_assignments(path: Path, labels, batch_rows: int = 250_000):
                 pa.table(
                     {
                         "node_id": np.arange(begin, end, dtype=np.uint32),
-                        "community": labels[begin:end],
+                        column: labels[begin:end],
                     },
                     schema=schema,
                 )

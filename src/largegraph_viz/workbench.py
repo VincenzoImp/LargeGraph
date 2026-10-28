@@ -43,11 +43,18 @@ def add_commands(sub) -> None:
     run.add_argument("--nodes-file", type=Path)
     run.add_argument("--passes", type=int, default=5)
     run.add_argument("--resolution", type=float, default=1)
-    run.add_argument("--backend", choices=["streaming", "clustre", "leiden"], default="streaming")
+    run.add_argument(
+        "--backend", choices=["streaming", "clustre", "leiden", "networkit"], default="streaming"
+    )
     run.add_argument("--clustre-binary", type=Path)
     run.add_argument("--clustre-mode", choices=["light", "light_plus"], default="light")
     run.add_argument("--seed", type=int, default=42)
-    run.add_argument("--max-groups", type=int, default=128)
+    run.add_argument(
+        "--max-groups",
+        type=int,
+        default=128,
+        help="Static-figure and large-forest display cap; interactive hierarchy has a safety cap of 1024 per level",
+    )
     run.add_argument("--max-edges", type=int, default=1200)
     run.add_argument("--hierarchy-targets", nargs="+", type=int, default=[16, 64, 256])
     run.add_argument("--pixels", type=int, default=512)
@@ -189,7 +196,7 @@ def dispatch(args, raw_args: list[str]) -> None:
             temp_dir=str(args.temp_dir.resolve()) if args.temp_dir else None,
             temp_limit=args.temp_limit,
         )
-        if args.images:
+        if options.images:
             import importlib.util
 
             for package in ("matplotlib", "scipy"):
@@ -198,7 +205,12 @@ def dispatch(args, raw_args: list[str]) -> None:
         if args.dry_run:
             emit(
                 preflight(
-                    args.input, args.work_dir or args.output, resources, args.ram, options.delimiter
+                    args.input,
+                    args.work_dir or args.output,
+                    resources,
+                    args.ram,
+                    options.delimiter,
+                    options,
                 )
             )
             return

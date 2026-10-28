@@ -1,0 +1,52 @@
+{
+  "artifacts": {
+    "clustering": "cache/cluster-0acc33f52a26c9816e15",
+    "hierarchy": "cache/hierarchy-68702a243a7c4dbfd071",
+    "index": "cache/index-edac89366c6c47d8b754",
+    "prepared": "cache/prepared-48be5bb447d7bcef44ff",
+    "profile": "cache/profile-1243178f32767c076570",
+    "quotient": "cache/quotient-7f13e72dfb9b813ec7e5"
+  },
+  "config": {
+    "input": {
+      "mtime_ns": 1793177736308577064,
+      "path": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/edges.csv",
+      "sha256": "17b9293a4341106ca0ddd1b2c6b4dd86467155ff5649c8b8b9caacb05404d000",
+      "size": 7777974671
+    },
+    "nodes": {
+      "mtime_ns": 1793177255213390428,
+      "path": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+      "sha256": "4bd9f66db92e98da2fe0ea65d0fb463cf15c94ba7de3bce3ba9124d7e99fa240",
+      "size": 57930118
+    },
+    "options": {
+      "backend": "streaming",
+      "clustre_binary": null,
+      "clustre_mode": "light",
+      "delimiter": ",",
+      "hash_input": true,
+      "hierarchy_targets": [
+        16,
+        64,
+        256
+      ],
+      "ignore_extra_columns": false,
+      "images": true,
+      "max_edges": 1200,
+      "max_groups": 512,
+      "node_column": "node_id",
+      "nodes_file": "/home/tux/graph/largegraph-viz/runs/full-scale-data/n5000000-communities-s42/data/nodes.csv",
+      "passes": 5,
+      "pixels": 512,
+      "resolution": 1,
+      "seed": 42,
+      "source": "source",
+      "target": "target"
+    },
+    "version": 1
+  },
+  "job_id": "996d8d44de047760957ac42302edbf32ff2102e9ad296f238754d3b661169940",
+  "phase": "complete",
+  "status": "complete"
+}

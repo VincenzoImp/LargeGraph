@@ -30,8 +30,8 @@ def test_complete_analysis_portable_report_and_index(source, tmp_path):
         source, tmp_path / "run", resources=R, options=AnalysisOptions(hierarchy_targets=(2, 4))
     )
     assert result.report.is_file()
-    assert "__REPORT_DATA__" not in result.report.read_text()
-    assert "https://cdn" not in result.report.read_text()
+    assert "__REPORT_DATA__" not in result.report.read_text(encoding="utf-8")
+    assert "https://cdn" not in result.report.read_text(encoding="utf-8")
     assert Analysis.open(result.output) == result
     query = result.neighbors("001", limit=1)
     assert query["node"]["original_id"] == "001"
@@ -45,6 +45,8 @@ def test_complete_analysis_portable_report_and_index(source, tmp_path):
     for level in data["levels"]:
         assert sum(node["size"] for node in level["nodes"]) == 7
         assert sum(node["volume"] for node in level["nodes"]) == 14
+    assert data["levels"][-1]["kind"] == "detected"
+    assert all(node["leaf"] is not None for node in data["levels"][-1]["nodes"])
     times = {path: path.stat().st_mtime_ns for path in result.output.rglob("manifest.json")}
     assert (
         analyze(
@@ -134,7 +136,7 @@ def test_failed_report_preserves_expensive_completed_work(source, tmp_path, monk
         analyze(source, run, resources=R)
     assert read_json(run / "analysis.json")["status"] == "failed"
     assert not (run / "report").exists()
-    preparation = next((run / "cache").glob("prepared-*"))
+    preparation = next(path for path in (run / "cache").glob("prepared-*") if path.is_dir())
     modified = (preparation / "manifest.json").stat().st_mtime_ns
     monkeypatch.setattr(report, "write_report", original)
     result = analyze(source, run, resources=R)
@@ -187,6 +189,42 @@ def test_config_rejected_before_input_is_opened(tmp_path):
     assert process.returncode == 2
     assert "max_groups" in process.stderr
     assert not (tmp_path / "run").exists()
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"seed": -1},
+        {"passes": 1.5},
+        {"max_edges": 1.5},
+        {"images": "false"},
+        {"hierarchy_targets": (2.5, 4)},
+    ],
+)
+def test_invalid_json_types_and_seed_fail_before_a_job(settings):
+    with pytest.raises(ValueError):
+        AnalysisOptions(**settings)
+
+
+@pytest.mark.parametrize("settings", [{"threads": 1.5}, {"batch_rows": 2.5}, {"threads": True}])
+def test_invalid_resource_types_fail_at_configuration(settings):
+    with pytest.raises(ValueError):
+        Resources(**settings)
+
+
+def test_preflight_checks_custom_headers_and_optional_node_file(source, tmp_path):
+    from largegraph_viz.budget import preflight
+
+    with pytest.raises(ValueError, match="do not contain"):
+        preflight(source, tmp_path / "out", R, options=AnalysisOptions(source="missing"))
+    with pytest.raises(FileNotFoundError):
+        preflight(
+            source,
+            tmp_path / "out",
+            R,
+            options=AnalysisOptions(nodes_file=tmp_path / "missing.csv"),
+        )
+    assert not (tmp_path / "out").exists()
 
 
 def test_changed_configuration_does_not_replace_report(source, tmp_path):
