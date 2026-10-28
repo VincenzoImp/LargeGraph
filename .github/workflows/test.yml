@@ -32,7 +32,7 @@ jobs:
       - run: uv run --no-sync pytest -q -m "not browser"
       - run: uv run --no-sync largegraph-viz demo --output runs/ci-demo --images
       - run: uv run --no-sync largegraph-viz verify runs/ci-demo --deep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: demo-${{ matrix.os }}-${{ matrix.python }}
@@ -59,7 +59,7 @@ jobs:
           cd /tmp
           /tmp/largegraph-wheel/bin/largegraph-viz demo --output packaged-demo
           /tmp/largegraph-wheel/bin/largegraph-viz verify packaged-demo --deep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: distributions
           path: dist/*
