@@ -1,227 +1,104 @@
 # largegraph-viz
 
-Disk-backed analysis and visualization of edge lists larger than RAM. The target
-workload is **5 million nodes and 500 million undirected edges on a CPU-only
-machine with 8 GB RAM**. An actual synthetic run at that scale completed under a
-verified **8,000,000,000-byte cgroup limit with swap disabled**, using two threads.
-Generation and the full pipeline took about **16.5 minutes**, with a largest
-sampled stage process-tree RSS of **4.15 GB**. See [measured verification](docs/verification.md)
-for hardware, raw evidence, view settings and limitations; timing is specific to that workstation.
+**Explore graphs larger than RAM on a CPU-only computer.**
 
-Three views share one cached reduction:
+Turn an edge list into an interactive local report, exact community summaries,
+structural profiles and publication-ready figures. Preparation uses disk-backed
+operations; the browser receives a bounded summary. No GPU, hosted service,
+account or graph upload is needed to analyze your data.
 
-| Command/script | Result | Interpretation |
-| --- | --- | --- |
-| `community` / `community_view.py` | Weighted node-link diagram, PNG/PDF/SVG and CSV | Relationships between detected groups |
-| `matrix` / `matrix_view.py` | Raw, density and degree-adjusted block matrices | Connectivity without depending on layout geometry |
-| `density` / `density_view.py` | Raster maps, raw pixel arrays, coordinates | Aggregated topology at multiple display caps, or all supplied node coordinates |
+[Quickstart](docs/quickstart.md) · [Python API](docs/api.md) ·
+[Methods](docs/methodology.md) · [Resource budget](docs/resource-budget.md) ·
+[Measured results](docs/verification.md) · [Contributing](CONTRIBUTING.md)
 
-Actual 5M-node / 500M-edge output, showing all 512 detected groups:
+![Interactive graph explorer](https://raw.githubusercontent.com/VincenzoImp/largegraph-viz/main/examples/figures/explorer.png)
 
-![Community-level view](examples/figures/full-communities.png)
+## Try it
 
-[Connectivity matrices](examples/figures/full-matrix.png) ·
-[Multiscale density map](examples/figures/full-density.png) ·
-[Bridge-scenario example](examples/figures/bridge-communities.png) ·
-[Archived measurements](examples/results/README.md)
-
-Community counts and quotient edge weights use the **whole input**, not an edge
-sample. Detection is heuristic. Figure filtering and artificial `Other` groups
-are disclosed in both captions and manifests. An aggregated raster is never
-presented as a recovered layout of every original node.
-
-## Install
-
-Linux, Python 3.11 or newer, no GPU. Run from this directory:
+With [uv](https://docs.astral.sh/uv/getting-started/installation/), from a checkout:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
+git clone https://github.com/VincenzoImp/largegraph-viz.git
+cd largegraph-viz
+uv sync --locked --no-dev
+uv run --no-sync largegraph-viz demo --open
 ```
 
-Alternatively, with uv:
+The demo is bundled and recomputed locally. Open `largegraph-demo/report/index.html`
+if a browser does not start automatically. The standalone HTML works offline.
+Released wheels also install with `pip` or `uv tool install`; see
+[installation](docs/quickstart.md#installation). Python 3.11+; Linux is the
+measured target-scale platform. CI exercises Linux, macOS and Windows.
+
+## Analyze your graph
 
 ```bash
-uv sync --extra dev
+uv run --no-sync largegraph-viz analyze edges.csv --output my-analysis --ram 8GB
+uv run --no-sync largegraph-viz serve my-analysis
 ```
 
-`sfdp` from Graphviz is optional. Layout falls back to igraph's compiled
-Fruchterman–Reingold implementation, always on a bounded display graph.
-CluStRE is an optional external backend; see [its integration guide](docs/clustre.md).
+CSV and Parquet inputs use `source,target` columns. Node identifiers are preserved
+as strings, including `001`. This beta implements **undirected, unweighted,
+simple graphs**: loops are removed, repeated/reversed edges are deduplicated and
+all changes are reported. Extra columns require an explicit opt-in. Weights and
+directions are not inferred. Include isolates with `--nodes-file nodes.csv`.
 
-## First images
+Before a large job, add `--dry-run` to inspect the input and estimated disk/RAM
+requirements. `--ram` is a planning target, **not an operating-system limit**.
+[Hard limits](docs/resource-budget.md) use the optional Linux cgroup runner.
 
-```bash
-.venv/bin/python scripts/generate_graph.py \
-  --config configs/small.json --output data/demo --nodes 10000 --edges 100000 \
-  --communities 12 --mixing 0.08 --seed 42 --memory 512MB
+## What you get
 
-.venv/bin/python scripts/render_all.py data/demo/edges.csv \
-  --nodes-file data/demo/nodes.csv --truth data/demo/nodes.csv \
-  --work-dir work/demo --output runs/demo --memory 512MB \
-  --levels 16 64 128 --max-groups 128 --pixels 1024 --reference --hash-input
-```
+| Task | Result |
+| --- | --- |
+| Understand structure | Linked network, matrix and density views; selection, search and hierarchical exploration |
+| Inspect exact counts | All-edge quotient weights, node counts, degree volumes, internal and boundary edges |
+| Characterize the graph | Degree distribution, connected components, isolates and largest-component size |
+| Investigate original nodes | Indexed ID lookup, paginated community membership and bounded neighborhood queries |
+| Share results | Portable HTML, Parquet/CSV/GraphML summary exports; optional PNG/PDF/SVG figures |
+| Recover long jobs | Completed preparation phases and native clustering passes are reused after interruption |
 
-Open `runs/demo/community/communities.png`, `runs/demo/matrix/matrix.png`, and
-`runs/demo/density/density_128.png`. Each also has a PDF and SVG version.
-`runs/demo/validation/validation.json` contains conservation checks, planted-label
-recovery and the bounded Leiden comparison. `pipeline.json` points to the exact
-cached artifacts used by the figures.
+Static figures: `uv sync --extra images`, then add `--images` to `analyze`.
+The base installation has **six direct dependencies**. Leiden, extended validation
+and external CluStRE build tools are optional; see the
+[dependency inventory](docs/dependencies.md).
 
-For individual views, replace `render_all.py` with `community_view.py`,
-`matrix_view.py`, or `density_view.py` and use a separate output directory.
-Every view accepts the original CSV and reuses cached preparation and detection.
+## Scale and interpretation
 
-## Input contract
+The original pipeline processed **5 million nodes and 500 million unique
+undirected edges** under an enforced **8,000,000,000-byte memory limit**, swap
+disabled, with two application threads. Generation plus analysis took about
+16.5 minutes on the measured workstation. This is evidence for that dataset and
+hardware, not a timing guarantee or a benchmark of every feature in this beta.
+See the [raw evidence and limitations](docs/verification.md).
 
-```csv
-source,target
-alice,bob
-bob,charlie
-```
+Counts use the complete canonical graph. Native detection is a modularity
+heuristic and can struggle with weak or core-periphery structure. The hierarchy
+is a descriptive maximum-spanning-forest construction. Layout distances are not
+metric distances, and density shows aggregate positions. Filtering, artificial
+`Other` groups and omitted link weight are disclosed in the report. Full node
+coordinates are used only when explicitly supplied.
 
-The initial version handles **undirected, unweighted, simple graphs**. Endpoints
-are strings, preserving identifiers such as `001`. It canonicalizes undirected
-pairs, removes loops, deduplicates repeated/reversed edges, and reports all such
-changes. Missing endpoints and malformed rows fail. Directions and weights are
-not inferred. Extra columns fail unless `--ignore-extra-columns` explicitly opts
-into discarding them. Only use undirected interpretation for data where that is
-scientifically appropriate.
+An 8 GB computer still needs an SSD workspace: initially allow around 100 GB for
+the target workload. Long identifiers, duplicates and sorting can change disk
+requirements substantially. See [recovery and integrity](docs/recovery.md),
+[methodology](docs/methodology.md) and [benchmark protocol](docs/experiments.md).
 
-Options include `--source`, `--target`, `--delimiter`, `--nodes-file` and
-`--node-column`. The optional node CSV includes isolated nodes; endpoints found
-in the edge CSV are retained even if absent from the node CSV. CSVs need headers.
-Ground-truth files are used by validation only. The generator randomizes node IDs
-so adjacency order does not directly expose planted blocks.
-
-The archived exact 512-community graph in `examples/full-quotient` is small enough
-to inspect directly. Its Parquet edge weights sum to all 500 million original
-edges; internal edges occupy the diagonal once. It can also be rendered through
-the Python API without the original CSV:
+## Use from Python
 
 ```python
-from pathlib import Path
-from largegraph_viz.runtime import Resources
-from largegraph_viz.views import render_community
+from largegraph_viz import AnalysisOptions, analyze
 
-render_community(Path("examples/full-quotient"), Path("runs/from-summary"),
-                 Resources(), max_groups=512)
+result = analyze("edges.parquet", "my-analysis", options=AnalysisOptions(passes=5))
+print(result.report)
+print(result.neighbors("alice", limit=20))
+result.export("summary", format="graphml")
 ```
 
-Preparation assigns stable, lexicographically ordered compact IDs. The mapping
-is saved as `nodes.parquet` (`node_id`, `original_id`). If genuine coordinates are
-available, create an `N × 2` numeric `.npy` array in this compact ID order:
+The [API guide](docs/api.md) covers configuration and reusable artifacts.
+[Individual view commands](docs/legacy-cli.md) remain available for research
+workflows. For bugs or resource regressions, include a small reproducer and
+`largegraph-viz doctor` output in an issue.
 
-```bash
-.venv/bin/python scripts/density_view.py edges.csv --nodes-file nodes.csv \
-  --coordinates xy.npy --work-dir work/real --output runs/coordinates
-```
-
-This mode bypasses detection and counts every node in fixed-size pixel grids.
-It does not generate or interpolate coordinates.
-
-## Resource controls
-
-Start with `--memory 3GB --threads 2 --batch-rows 250000`. `--memory` controls
-DuckDB's buffer budget, **not total process RSS**. NumPy, Arrow, JIT compilation,
-layout libraries, and figure buffers need additional memory. Manifests record
-sampled peak process-tree RSS, wall time and working disk usage. Do not run
-several full pipelines concurrently on an 8 GB machine.
-
-Provide an SSD workspace, initially around 100 GB free for the target scale.
-This is an estimate: external sorting, strings and duplicate rates can change it
-substantially. `--temp-dir /path/on/ssd --temp-limit 80GB` controls spill storage.
-All temporary graph structures stay on disk. Flat adjacency is read in bounded
-blocks, rather than mapping and touching the complete edge array.
-
-`--passes` controls native clustering scans (default 5). Each pass additionally
-scans canonical edges to evaluate its exact modularity. More passes trade time
-for local refinement; they do not guarantee global optimality. `--resolution`
-changes the modularity objective. `--max-groups` defaults to 128 and cannot exceed
-1024; the remaining communities are explicitly grouped as artificial `Other`.
-Full detected assignments and quotient weights are retained on disk.
-
-`--max-edges` controls image filtering only. `--levels 32 128 512` selects nested
-display reductions; layouts at each level are computed independently. `--pixels`
-is limited to 64–4096 to bound image memory. The scientific meaning of these
-choices is detailed in [methodology](docs/methodology.md).
-
-## Benchmarks and scientific checks
-
-```bash
-.venv/bin/python -m pytest -q
-.venv/bin/ruff check .
-
-.venv/bin/python scripts/benchmark.py --output runs/benchmark \
-  --sizes 10000 100000 --scenarios communities weak bridges core-periphery null \
-  --seeds 42 43 44 --reference --memory 512MB --rss-limit-gb 6
-
-.venv/bin/python scripts/benchmark.py --output runs/spill-test \
-  --spill-only --spill-memory 64MB --spill-rows 4000000
-```
-
-For a hard memory constraint on a Linux machine with a systemd user manager:
-
-```bash
-.venv/bin/python scripts/constrained_run.py --output runs/limited \
-  --memory-gb 8 --cpu-cores 8 -- \
-  .venv/bin/python scripts/benchmark.py --output runs/limited-data \
-  --sizes 100000 --mean-degree 200 --communities 32 --memory 3GB
-```
-
-The runner verifies actual cgroup limits, disables swap, records cgroup memory
-(including page cache and children), and retains the command, trace and log.
-The eight-core quota limits CPU time; it does not reproduce another CPU model.
-
-The recorded target-scale benchmark used the same runner with
-`--sizes 5000000 --mean-degree 200 --communities 512 --levels 32 128 512 --pixels 1024`.
-Its cgroup report and pipeline manifests are archived under `examples/results`.
-
-Each benchmark stage is a fresh subprocess. The sampled RSS guard terminates a
-stage exceeding the requested threshold, but is not a hard operating-system RAM
-limit. The spill experiment must observe nonzero temporary storage in DuckDB's
-profile or monitoring data; a small successful run alone does not establish
-out-of-core execution. See [the experimental protocol](docs/experiments.md).
-
-## Target-scale run
-
-Run smaller benchmarks and check storage before starting this workload:
-
-```bash
-.venv/bin/python scripts/generate_graph.py --output data/full \
-  --config configs/full.json
-
-.venv/bin/python scripts/render_all.py data/full/edges.csv \
-  --nodes-file data/full/nodes.csv --truth data/full/nodes.csv \
-  --work-dir work/full --output runs/full --memory 3GB --threads 2 \
-  --batch-rows 250000 --hash-input --levels 32 128 512 --max-groups 512
-```
-
-The generator produces exactly the requested number of **unique retained edges**,
-not just that many raw proposals. Realized degrees and mixing differ from their
-proposal parameters after removing duplicate/self edges. The model is precisely
-specified in the methodology; it is not claimed to reproduce every property of
-social networks or to be the canonical Bernoulli DC-SBM.
-
-## Reproducibility and recovery
-
-Generated datasets refuse to replace existing output. Prepared, clustered and
-quotient artifacts are built under `.inprogress` directories and renamed only
-after success. Interrupted work is retained for inspection. Move or explicitly
-remove the indicated incomplete directory before retrying. Rendering may replace
-its own output figures; use new run directories for paper experiments.
-
-Caches include input paths, sizes, modification times, parsing choices and
-algorithm parameters. `--hash-input` adds SHA-256 and is recommended for archived
-experiments. A file-stat cache is a convenience, not a content integrity proof.
-Exact library versions are saved in manifests. Keep the input data, manifests,
-configuration and environment together when archiving results.
-
-Generation accepts `--config configs/small.json` or `--config configs/full.json`;
-explicit command-line flags override JSON defaults. Check dependencies and the
-provisional disk budget with `python scripts/doctor.py --target-scale`.
-
-Read [the resource budget](docs/resource-budget.md), [scientific methodology](docs/methodology.md)
-and [references](docs/references.bib). See [verification status](docs/verification.md)
-for what was actually executed in the development environment. Synthetic output,
-workspaces and benchmark runs are excluded from Git.
+Our source is MIT-licensed. Dependencies retain their own licenses, including
+GPL components; see [third-party notices](THIRD_PARTY_NOTICES.md).

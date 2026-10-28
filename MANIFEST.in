@@ -1,0 +1,9 @@
+include LICENSE README.md CITATION.cff CHANGELOG.md
+recursive-include src/largegraph_viz/assets *.csv *.html
+include src/largegraph_viz/py.typed
+recursive-include tests *.py
+prune data
+prune work
+prune runs
+prune vendor
+prune .venv

@@ -1,0 +1,25 @@
+name: Bug report
+description: A reproducible failure, unexpected result or resource regression
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Expected and actual behavior; include the exact command or API call.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: A small edge list or generator command, relevant flags and error text. Remove private data.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment and budget
+      description: Paste largegraph-viz doctor, RAM target, available disk and the failing phase from analysis.json.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Evidence
+      description: Attach relevant manifests or validation output. State whether the failure reproduces on a fresh output directory.

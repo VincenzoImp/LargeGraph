@@ -1,22 +1,65 @@
-name: test
+name: checks
 on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  scientific-checks:
-    runs-on: ubuntu-latest
+  python:
+    name: Python ${{ matrix.python }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python: ["3.11", "3.12"]
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12", "3.13"]
+        include:
+          - os: macos-latest
+            python: "3.12"
+          - os: windows-latest
+            python: "3.12"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v7
         with:
+          version: "0.11.28"
           python-version: ${{ matrix.python }}
-      - run: python -m pip install -e '.[dev]'
-      - run: ruff check .
-      - run: pytest -q
-      - run: python scripts/generate_graph.py --output data/smoke --nodes 2000 --edges 20000 --communities 8 --memory 256MB
-      - run: python scripts/render_all.py data/smoke/edges.csv --nodes-file data/smoke/nodes.csv --truth data/smoke/nodes.csv --work-dir work/smoke --output runs/smoke --pixels 256 --levels 8 16 --reference --memory 256MB
+          enable-cache: true
+      - run: uv sync --locked --extra images --extra leiden --extra validation
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check src tests
+      - run: uv run --no-sync pytest -q -m "not browser"
+      - run: uv run --no-sync largegraph-viz demo --output runs/ci-demo --images
+      - run: uv run --no-sync largegraph-viz verify runs/ci-demo --deep
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-${{ matrix.os }}-${{ matrix.python }}
+          path: runs/ci-demo/report
+  browser-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --locked --extra images --extra leiden --extra validation --group browser
+      - run: uv run --no-sync mypy
+      - run: uv run --no-sync playwright install --with-deps chromium
+      - run: uv run --no-sync pytest -q -m browser
+      - run: uv build
+      - run: uv run --no-sync twine check --strict dist/*
+      - name: Install the base wheel in a clean environment
+        run: |
+          uv venv /tmp/largegraph-wheel --python 3.12
+          uv pip install --python /tmp/largegraph-wheel/bin/python dist/*.whl
+          cd /tmp
+          /tmp/largegraph-wheel/bin/largegraph-viz demo --output packaged-demo
+          /tmp/largegraph-wheel/bin/largegraph-viz verify packaged-demo --deep
       - uses: actions/upload-artifact@v4
         with:
-          name: figures-${{ matrix.python }}
-          path: runs/smoke
+          name: distributions
+          path: dist/*

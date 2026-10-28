@@ -18,3 +18,7 @@ vendor/
 *.bundle
 *.tar.gz
 *.inprogress/
+.mypy_cache/
+.coverage
+htmlcov/
+largegraph-demo/

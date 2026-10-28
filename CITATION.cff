@@ -5,7 +5,7 @@ repository-code: "https://github.com/VincenzoImp/largegraph-viz"
 authors:
   - name: largegraph-viz contributors
 type: software
-version: 0.1.0
+version: 0.2.0b1
 license: MIT
 abstract: "CPU-only disk-backed graph preparation, heuristic community detection, exact quotient aggregation and complementary large-network views."
 keywords:

@@ -1,0 +1,51 @@
+name: publish
+on:
+  workflow_dispatch:
+    inputs:
+      index:
+        description: Package index (requires a configured Trusted Publisher)
+        required: true
+        type: choice
+        options: [testpypi, pypi]
+        default: testpypi
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.28"
+          python-version: "3.12"
+      - run: uv sync --locked --extra images --extra leiden --extra validation
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync pytest -q -m "not browser"
+      - run: uv build
+      - run: uv run --no-sync twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/*
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.index }}
+      url: https://${{ inputs.index == 'pypi' && 'pypi.org' || 'test.pypi.org' }}/p/largegraph-viz
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - name: Publish to PyPI with attestation
+        if: inputs.index == 'pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish to TestPyPI with attestation
+        if: inputs.index == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

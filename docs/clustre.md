@@ -18,7 +18,7 @@ The tested Linux build used upstream commit
 and the following commands (no root/system MPI installation was needed):
 
 ```bash
-uv sync --extra dev --extra clustre-build
+uv sync --locked --extra images --extra leiden --extra validation --extra clustre-build
 git clone https://github.com/KaHIP/CluStRE.git vendor/CluStRE
 git -C vendor/CluStRE checkout 39a4e57c2de0bee45a2752597db502963a1536de
 git -C vendor/CluStRE submodule update --init --recursive
