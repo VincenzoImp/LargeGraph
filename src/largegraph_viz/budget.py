@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import re
@@ -34,7 +35,15 @@ def available_memory() -> int:
         limit = (root / "memory.max").read_text().strip()
         current = int((root / "memory.current").read_text())
         if limit != "max":
-            available = min(available, max(0, int(limit) - current))
+            inactive_file = 0
+            with contextlib.suppress(OSError, ValueError):
+                statistics = dict(
+                    line.split() for line in (root / "memory.stat").read_text().splitlines()
+                )
+                inactive_file = int(statistics.get("inactive_file", 0))
+            # A full input hash can populate the cgroup with reclaimable file
+            # pages. Treating that cache as live arrays falsely reports no RAM.
+            available = min(available, int(limit), max(0, int(limit) - current + inactive_file))
     except (OSError, ValueError, StopIteration):
         pass
     return available

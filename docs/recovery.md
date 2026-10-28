@@ -49,3 +49,8 @@ Disk full: free space on the data and spill volumes, inspect the failing phase,
 then repeat the command. The source edge list is never used as scratch storage.
 You can increase `--temp-limit` or move `--temp-dir` on retry. Completed cache
 artifacts are still reused.
+
+Phase metrics describe the successful builder invocation. Cached artifacts retain
+their original producing metrics; time/RSS from interrupted attempts is not
+automatically accumulated. Keep each attempt's external cgroup/log record when
+measuring recovery costs, and use a fresh cache for uncached performance claims.

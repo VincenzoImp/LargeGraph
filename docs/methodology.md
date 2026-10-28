@@ -1,5 +1,9 @@
 # Methodology
 
+This page describes the engine and interpretation. The 0.2 local workbench adds
+the exact profiles and descriptive hierarchy specified below; original 0.1
+experiments remain archived with their producing versions.
+
 ## Research question and interpretation
 
 The software supports visual inspection of connectivity at scales where individual
@@ -29,6 +33,12 @@ The input is read once for ingestion, plus an optional complete SHA-256 pass.
 External sorting and joins may make multiple internal disk passes. They must not
 be described as a single streaming pass or as O(m) CPU work. Sorting has external
 sorting I/O complexity; runtime depends heavily on spill volume and disk speed.
+
+The high-level workflow also fingerprints its job input before preparation; with
+`--hash-input`, a first uncached analysis currently performs that additional full
+hash scan. Artifact sealing reads output files once to record SHA-256 baselines.
+Normal reuse hashes only small output files and checks all lengths; deep
+verification is an explicitly requested scan of all stored bytes.
 
 ## Community detection
 

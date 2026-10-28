@@ -164,3 +164,29 @@ def test_local_server_queries_and_rejects_unknown_hosts(tmp_path):
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_cgroup_headroom_accounts_for_reclaimable_input_cache(monkeypatch):
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    import psutil
+
+    from largegraph_viz.budget import available_memory
+
+    files = {
+        "cgroup": "0::/graph-budget-test\n",
+        "memory.max": "8000000000",
+        "memory.current": "8000000000",
+        "memory.stat": "inactive_file 7500000000\n",
+    }
+    original = Path.read_text
+
+    def read(path, *args, **kwargs):
+        if str(path) == "/proc/self/cgroup" or "graph-budget-test" in str(path):
+            return files[path.name]
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read)
+    monkeypatch.setattr(psutil, "virtual_memory", lambda: SimpleNamespace(available=10_000_000_000))
+    assert available_memory() == 7_500_000_000

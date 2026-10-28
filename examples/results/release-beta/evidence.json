@@ -1,0 +1,8 @@
+{
+  "cold_output_directory": true,
+  "input_sha256": "17b9293a4341106ca0ddd1b2c6b4dd86467155ff5649c8b8b9caacb05404d000",
+  "report_bytes": 2001638,
+  "scope": "Complete 0.2 analysis from existing original CSV; generation excluded",
+  "shared_host_activity": "Documentation, wheel build and small tests during the run; timing is descriptive, not an isolated speed comparison",
+  "source_commit": "a022c78"
+}

@@ -10,7 +10,7 @@ workload is **5 million nodes and 500 million undirected edges on a CPU-only
 machine with 8 GB RAM**. An actual synthetic run at that scale completed under a
 verified **8,000,000,000-byte cgroup limit with swap disabled**, using two threads.
 Generation and the full pipeline took about **16.5 minutes**, with a largest
-sampled stage process-tree RSS of **4.15 GB**. See [measured verification](docs/verification.md)
+sampled stage process-tree RSS of **4.15 GB**. See [measured verification](verification.md)
 for hardware, raw evidence, view settings and limitations; timing is specific to that workstation.
 
 Three views share one cached reduction:
@@ -23,12 +23,12 @@ Three views share one cached reduction:
 
 Actual 5M-node / 500M-edge output, showing all 512 detected groups:
 
-![Community-level view](examples/figures/full-communities.png)
+![Community-level view](../examples/figures/full-communities.png)
 
-[Connectivity matrices](examples/figures/full-matrix.png) ·
-[Multiscale density map](examples/figures/full-density.png) ·
-[Bridge-scenario example](examples/figures/bridge-communities.png) ·
-[Archived measurements](examples/results/README.md)
+[Connectivity matrices](../examples/figures/full-matrix.png) ·
+[Multiscale density map](../examples/figures/full-density.png) ·
+[Bridge-scenario example](../examples/figures/bridge-communities.png) ·
+[Archived measurements](../examples/results/README.md)
 
 Community counts and quotient edge weights use the **whole input**, not an edge
 sample. Detection is heuristic. Figure filtering and artificial `Other` groups
@@ -52,7 +52,7 @@ uv sync --locked --extra images --extra leiden --extra validation
 
 `sfdp` from Graphviz is optional. Layout falls back to igraph's compiled
 Fruchterman–Reingold implementation, always on a bounded display graph.
-CluStRE is an optional external backend; see [its integration guide](docs/clustre.md).
+CluStRE is an optional external backend; see [its integration guide](clustre.md).
 
 ## First images
 
@@ -149,7 +149,7 @@ Full detected assignments and quotient weights are retained on disk.
 `--max-edges` controls image filtering only. `--levels 32 128 512` selects nested
 display reductions; layouts at each level are computed independently. `--pixels`
 is limited to 64–4096 to bound image memory. The scientific meaning of these
-choices is detailed in [methodology](docs/methodology.md).
+choices is detailed in [methodology](methodology.md).
 
 ## Benchmarks and scientific checks
 
@@ -186,7 +186,7 @@ Each benchmark stage is a fresh subprocess. The sampled RSS guard terminates a
 stage exceeding the requested threshold, but is not a hard operating-system RAM
 limit. The spill experiment must observe nonzero temporary storage in DuckDB's
 profile or monitoring data; a small successful run alone does not establish
-out-of-core execution. See [the experimental protocol](docs/experiments.md).
+out-of-core execution. See [the experimental protocol](experiments.md).
 
 ## Target-scale run
 
@@ -227,7 +227,7 @@ Generation accepts `--config configs/small.json` or `--config configs/full.json`
 explicit command-line flags override JSON defaults. Check dependencies and the
 provisional disk budget with `python scripts/doctor.py --target-scale`.
 
-Read [the resource budget](docs/resource-budget.md), [scientific methodology](docs/methodology.md)
-and [references](docs/references.bib). See [verification status](docs/verification.md)
+Read [the resource budget](resource-budget.md), [scientific methodology](methodology.md)
+and [references](references.bib). See [verification status](verification.md)
 for what was actually executed in the development environment. Synthetic output,
 workspaces and benchmark runs are excluded from Git.

@@ -39,3 +39,10 @@ the measured large-scale platform. Other platforms require their own CI evidence
 4. Self-contained linked interactive report and packaged demo.
 5. Dependency split, uv workflows, documentation and release packaging.
 6. Recovery/browser/package checks, constrained benchmark, public release.
+
+## Delivered beta
+
+Implemented in 0.2.0b1. See [verification](verification-beta.md),
+[the quickstart](quickstart.md) and [release instructions](releasing.md). The
+package, GitHub assets and publishing workflow are prepared independently of
+the owner's external PyPI Trusted Publisher setup.
