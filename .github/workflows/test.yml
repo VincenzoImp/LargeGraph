@@ -20,7 +20,7 @@ jobs:
           - os: windows-latest
             python: "3.12"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           version: "0.11.28"
@@ -32,7 +32,7 @@ jobs:
       - run: uv run --no-sync pytest -q -m "not browser"
       - run: uv run --no-sync largegraph-viz demo --output runs/ci-demo --images
       - run: uv run --no-sync largegraph-viz verify runs/ci-demo --deep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: demo-${{ matrix.os }}-${{ matrix.python }}
@@ -54,7 +54,7 @@ jobs:
   browser-and-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           version: "0.11.28"
@@ -73,7 +73,21 @@ jobs:
           cd /tmp
           /tmp/largegraph-wheel/bin/largegraph-viz demo --output packaged-demo
           /tmp/largegraph-wheel/bin/largegraph-viz verify packaged-demo --deep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: distributions
           path: dist/*
+      - uses: actions/download-artifact@v8
+        with:
+          name: distributions
+          path: artifact-roundtrip/
+      - name: Verify distribution upload and download preserve every byte
+        run: |
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          original = [*Path("dist").glob("*.whl"), *Path("dist").glob("*.tar.gz")]
+          received = list(Path("artifact-roundtrip").iterdir())
+          assert len(original) == 2
+          assert {p.name for p in received} == {p.name for p in original}
+          assert all((Path("artifact-roundtrip") / p.name).read_bytes() == p.read_bytes() for p in original)
+          PY
