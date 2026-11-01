@@ -22,7 +22,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
-  "numpy>=2.5.4,<3", "duckdb>=1.5.6,<2", "pyarrow>=24.0.0,<25",
+  "numpy>=2.5.4,<3", "duckdb>=1.5.6,<3", "pyarrow>=24.0.0,<25",
   "igraph>=1.0.0,<2", "numba>=0.68.1,<1", "psutil>=7.2.2,<8",
 ]
 
